@@ -123,12 +123,13 @@
 {% endcode-tabs-item %}
 {% endcode-tabs %}
 
-### Vue指令之`v-bind`的三种用法
+### Vue指令之`v-bind`的和`v-on`
 
-1. 直接使用指令`v-bind`
-2. 使用简化指令`:`
-3. 在绑定的时候，拼接绑定内容：`:title="btnTitle + ', 这是追加的内容'"`
-4. `v-o`
+**指令名`v-bind`简化指令`:`**在绑定的时候，拼接绑定内容：`:title="btnTitle + ', 这是追加的内容'"`
+
+`v-bind`进行绑定的是属性，后面的字符串已经变成了**表达式**不再是字符串了
+
+**指令名`v-on`简化指令`@`**
 
 {% code-tabs %}
 {% code-tabs-item title="v-bind,v-on的学习.html" %}
@@ -141,7 +142,7 @@
 </head>
 <body>
     <div id="app">
-        <!-- v-bind:是vue中提供绑定属性的指令,把后面属性值编程表达式 -->
+        <!-- v-bind:是vue中提供绑定属性的指令,把后面属性值变成表达式 -->
         <!-- 属性里不能使用插值表达式，因为会全当成字符串 -->
         <input type="button" value="按钮1" v-bind:title="mytitle+'123'" v-on:click="alert">
         <!-- 按钮鼠标悬停显示这是自定义title123 -->
