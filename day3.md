@@ -244,7 +244,7 @@
     <login v-if="flag"></login>
     <register v-else="flag"></register>
     <hr>
-    <h2>使用component元素切换组件(不限定数量切换)</h2>
+    <h2>使用component元素切换组件(不限定数量切换),并添加切换动画</h2>
     <a href="" @click.prevent="componentId='login'">登录</a>
     <a href="" @click.prevent="componentId='register'">注册</a>
     <!-- component是一个占位符，:is属性，可以用来指定要展示的组件名称 -->
@@ -283,269 +283,299 @@
 -->
 ```
 
-**使用`:is`属性来切换不同的字组件，并添加切换动画**
+**使用`:is`属性来切换不同的字组件，并添加切换动画步骤详解**
 
 组件实例定义方式：
 
-```text
-  // 登录组件
-    const login = Vue.extend({
-      template: `<div>
-        <h3>登录组件</h3>
-      </div>`
-    });
-    Vue.component('login', login);
-​
-    // 注册组件
-    const register = Vue.extend({
-      template: `<div>
-        <h3>注册组件</h3>
-      </div>`
-    });
-    Vue.component('register', register);
-​
-    // 创建 Vue 实例，得到 ViewModel
-    var vm = new Vue({
-      el: '#app',
-      data: { comName: 'login' },
-      methods: {}
-    });
+```javascript
+// 登录组件
+const login = Vue.extend({
+  template: `<div>
+    <h3>登录组件</h3>
+  </div>`
+});
+Vue.component('login', login);
+// 注册组件
+const register = Vue.extend({
+  template: `<div>
+    <h3>注册组件</h3>
+  </div>`
+});
+Vue.component('register', register);
+// 创建 Vue 实例，得到 ViewModel
+var vm = new Vue({
+  el: '#app',
+  data: { comName: 'login' },
+  methods: {}
+});
 ```
 
 使用`component`标签，来引用组件，并通过`:is`属性来指定要加载的组件：
-
-```text
-  <div id="app">
-    <a href="#" @click.prevent="comName='login'">登录</a>
-    <a href="#" @click.prevent="comName='register'">注册</a>
-    <hr>
-    <transition mode="out-in">
-      <component :is="comName"></component>
-    </transition>
-  </div>
-```
-
-添加切换样式：
-
-```text
-  <style>
-    .v-enter,
-    .v-leave-to {
-      opacity: 0;
-      transform: translateX(30px);
-    }
-​
-    .v-enter-active,
-    .v-leave-active {
-      position: absolute;
-      transition: all 0.3s ease;
-    }
-​
-    h3{
-      margin: 0;
-    }
-  </s
-```
-
-## 父组件向子组件传值
 
 ```markup
-<html>
-    <head>
-        <meta charset='utf-8'>
-        <title></title>
-        <script src='https://cdn.jsdelivr.net/npm/vue/dist/vue.js'></script>
-    </head>
-    <body>
-        <div id='app'>
-            <h2>使用v-if、v-else切换组件（只能两个之间切换）</h2>
-            <a href="" @click.prevent="flag=true">登录</a>
-            <a href="" @click.prevent="flag=false">注册</a>
-            <login v-if="flag"></login>
-            <register v-else="flag"></register>
-            <hr>
-            <h2>使用component元素切换组件(不限定数量切换)</h2>
-            <a href="" @click.prevent="componentId='login'">登录</a>
-            <a href="" @click.prevent="componentId='register'">注册</a>
-            <!-- component是一个占位符，:is属性，可以用来指定要展示的组件名称 -->
-            <component :is="componentId"></component>
-        </div>
-    </body>
-    <script>
-        Vue.component('login',{
-            template:'<h3>登录组件</h3>'
-        })
-        Vue.component('register',{
-            template:'<h3>注册组件</h3>'
-        })
-        // 实例化vue对象
-        let vm = new Vue({
-            // 绑定对象
-            el:'#app',
-            data:{
-                flag:true,
-                componentId:'login'
-            },
-            methods:{
-            }
-        })
-    </script>
-</html>
-
-<!-- 当前学过的Vue标签 -->
-<!--
-    <component :is="componentId"></component>
-    <template></template>
-    <transition></transition>
-    <transition-group></transition-group>
--->
-```
-
-1. 组件实例定义方式，注意：一定要使用`props`属性来定义父组件传递过来的数据
-
-   ```text
-   <script>
-    // 创建 Vue 实例，得到 ViewModel
-    var vm = new Vue({
-      el: '#app',
-      data: {
-        msg: '这是父组件中的消息'
-      },
-      components: {
-        son: {
-          template: '<h1>这是子组件 --- {{finfo}}</h1>',
-          props: ['finfo']
-        }
-      }
-    });
-   </script>
-   ```
-
-2. 使用`v-bind`或简化指令，将数据传递到子组件中：
-
-   ```text
-   <div id="app">
-    <son :finfo="msg"></son>
-   </div>
-   ```
-
-## 子组件向父组件传值
-
-组件实例定义方式：
-
-```text
-// 登录组件
- const login = Vue.extend({
-   template: `<div>
-     <h3>登录组件</h3>
-   </div>`
- });
- Vue.component('login', login);
-
- // 注册组件
- const register = Vue.extend({
-   template: `<div>
-     <h3>注册组件</h3>
-   </div>`
- });
- Vue.component('register', register);
-
- // 创建 Vue 实例，得到 ViewModel
- var vm = new Vue({
-   el: '#app',
-   data: { comName: 'login' },
-   methods: {}
- });
-```
-
-使用`component`标签，来引用组件，并通过`:is`属性来指定要加载的组件：
-
-```text
 <div id="app">
- <a href="#" @click.prevent="comName='login'">登录</a>
- <a href="#" @click.prevent="comName='register'">注册</a>
- <hr>
- <transition mode="out-in">
-   <component :is="comName"></component>
- </transition>
+  <a href="#" @click.prevent="comName='login'">登录</a>
+  <a href="#" @click.prevent="comName='register'">注册</a>
+  <hr>
+  <transition mode="out-in">
+    <component :is="comName"></component>
+  </transition>
 </div>
 ```
 
 添加切换样式：
 
-```text
+```css
 <style>
- .v-enter,
- .v-leave-to {
-   opacity: 0;
-   transform: translateX(30px);
- }
-
- .v-enter-active,
- .v-leave-active {
-   position: absolute;
-   transition: all 0.3s ease;
- }
-
- h3{
-   margin: 0;
- }
+  .v-enter,
+  .v-leave-to {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+  .v-enter-active,
+  .v-leave-active {
+    position: absolute;
+    transition: all 0.3s ease;
+  }
+  h3{
+    margin: 0;
+  }
 </style>
 ```
 
-1. 原理：父组件将方法的引用，传递到子组件内部，子组件在内部调用父组件传递过来的方法，同时把要发送给父组件的数据，在调用方法的时候当作参数传递进去；
-2. 父组件将方法的引用传递给子组件，其中，`getMsg`是父组件中`methods`中定义的方法名称，`func`是子组件调用传递过来方法时候的方法名称
+## 父子组件之间的传值
 
-   ```text
-   <son @func="getMsg"></son>
-   ```
+### 父向子传值
 
-3. 子组件内部通过`this.$emit('方法名', 要传递的数据)`方式，来调用父组件中的方法，同时把数据传递给父组件使用
-
-   ```text
-   <div id="app">
-    <!-- 引用父组件 -->
-    <son @func="getMsg"></son>
-
-    <!-- 组件模板定义 -->
-    <script type="x-template" id="son">
-      <div>
-        <input type="button" value="向父组件传值" @click="sendMsg" />
-      </div>
-    </script>
-   </div>
-
-   <script>
-    // 子组件的定义方式
-    Vue.component('son', {
-      template: '#son', // 组件模板Id
-      methods: {
-        sendMsg() { // 按钮的点击事件
-          this.$emit('func', 'OK'); // 调用父组件传递过来的方法，同时把数据传递出去
-        }
-      }
-    });
-
+```markup
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Document</title>
+    <script src="./lib/vue.js"></script>
+</head>
+<body>
+<div id="app">
+    <!-- 父组件，可以在引用子组件的时候，通过属性绑定（v-bind:）的形式, 把需要传递给子组件的数据，以属性绑定的形式，传递到子组件内部，供子组件使用 -->
+    <com1 v-bind:parentmsg="msg"></com1><!-- v-bind绑定后也不能立即使用，需要在子组件的props数组里定义一下 -->
+</div>
+<script>
     // 创建 Vue 实例，得到 ViewModel
     var vm = new Vue({
-      el: '#app',
-      data: {},
+        el: '#app',
+        data: {
+            msg: '123 啊-父组件中的数据'
+        },
+        methods: {},
+        components: {
+            // 子组件中默认无法访问到父组件中的data上的数据和methods 中的方法
+            com1: {
+                // data: function () {
+                //     // 因为data一定得是方法，所以两种书写方式都行，这种和下面那种
+                //     return {
+                //         title: '123',
+                //         content: 'qqq'
+                //     }
+                // },
+                data() { // 注意：子组件中的 data 数据，并不是通过父组件传递过来的，而是子组件自身私有的，比如：子组件通过 Ajax，请求回来的数据，都可以放到 data 身上；
+                    // data 上的数据，都是可读可写的；props中的数据，都是只读的，无法重新赋值
+                    return {
+                        title: '123',
+                        content: 'qqq'
+                    }
+                },
+                template: '<h1 @click="change">这是子组件 --- {{ parentmsg }}</h1>',
+                // 注意：组件中的所有props中的数据，都是通过父组件传递给子组件的
+                // props中的数据，都是只读的，无法重新赋值
+                props: ['parentmsg'], // 把父组件传递过来的parentmsg属性，先在props数组定义一下，这样才能使用这个数据
+                directives: {},
+                filters: {},
+                components: {},
+                methods: {change() {this.parentmsg = '被修改了'}}
+            }
+        }
+    });
+</script>
+</body>
+</html>
+```
+
+### 父向子传递函数和子组件向父组件传值
+
+**父组件向子组件传递方法：**使用的是事件绑定机制；v-on,调用是在子组件里使用$emit进行调用
+
+**子组件向父组件传值用以下方法实现：**
+
+* 原理：父组件将方法的引用，传递到子组件内部，子组件在内部调用父组件传递过来的方法，同时把要发送给父组件的数据，在调用方法的时候当作参数传递进去。
+* 父组件将方法的引用传递给子组件，其中，`show`是父组件中`methods`中定义的方法名称，`func`是子组件调用传递过来方法时候的方法名称`<com2 @func="show"></com2>`
+* 子组件内部通过`this.$emit('方法名', 要传递的数据)`方式，来调用父组件中的方法，同时把数据传递给父组件使用
+
+```markup
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Document</title>
+    <script src="./lib/vue.js"></script>
+</head>
+<body>
+  <div id="app">
+    <!-- 父组件向子组件传递方法，使用的是事件绑定机制；v-on -->
+    <com2 @func="show"></com2><!-- 调用是在子组件里使用$emit进行调用 -->
+  </div>
+  <template id="tmpl">
+    <div>
+      <h1>这是子组件的模板</h1>
+      <input type="button" value="这是子组件中的按钮，点击它，触发父组件传递过来的func方法" @click="myclick">
+    </div>
+  </template>
+
+  <script>
+    // 定义了一个字面量类型的组件模板对象
+    let com2 = {
+      template: '#tmpl', // 通过指定了一个Id,表示去加载这个指定Id的template元素中的内容，当作组件的HTML结构
+      data() {
+        return {
+          sonmsg: { name: '小头儿子', age: 6 }
+        }
+      },
       methods: {
-        getMsg(val){ // 子组件中，通过 this.$emit() 实际调用的方法，在此进行定义
-          alert(val);
+        myclick() {
+          // 使用emit在子组件调用父组件传来的方法，emit 英文原意是触发，调用、发射的意思
+          // this.$emit('func123', 123, 456)，第一个参数是方法名，后面的参数都是方法的形参
+          this.$emit('func', this.sonmsg)
         }
       }
+    }
+
+    let vm = new Vue({
+      el: '#app',
+      data: {
+        datamsgFormSon: null  //用于接收子组件传来的数据
+      },
+      methods: {
+        show(data) {
+          console.log('调用了父组件身上的 show 方法: --- ' + data)
+          this.datamsgFormSon = data  //获取子组件传来的数据
+          console.log(this.datamsgFormSon.name) //使用子组件传来的数据
+        }
+      },
+      components: {
+        com2
+        // com2: com2
+      }
     });
-   </script>
-   ```
+  </script>
+</body>
+</html>
+```
 
 ## 评论列表案例
 
 目标：主要练习父子组件之间传值
 
+```markup
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Doc</title>
+    <script src="./lib/vue.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/css/bootstrap.min.css"
+          integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+</head>
+<body>
+<div id="app">
+    <cmt-box @func="loadComments"></cmt-box>
+    <ul class="list-group">
+        <li class="list-group-item" v-for="item in list" :key="item.id">
+            <span class="badge">评论人：{{ item.user }}</span>
+            {{ item.content }}
+        </li>
+    </ul>
+</div>
+<template id="tmpl">
+    <div>
+        <div class="form-group">
+            <label>评论人：</label>
+            <input type="text" class="form-control" v-model="user">
+        </div>
+
+        <div class="form-group">
+            <label>评论内容：</label>
+            <textarea class="form-control" v-model="content"></textarea>
+        </div>
+        <div class="form-group">
+            <input type="button" value="发表评论" class="btn btn-primary" @click="postComment">
+        </div>
+    </div>
+</template>
+<script>
+    let commentBox = {
+        data() {  //评论输入框内容置空
+            return {
+                user: '',
+                content: ''
+            }
+        },
+        template: '#tmpl',
+        methods: {
+            postComment() { // 发表评论的方法
+                // 分析：发表评论的业务逻辑
+                // 1. 评论数据存到哪里去？？？存放到了localStorage（开发者工具Application的local Storage）中，localStorage.setItem('cmts', '')
+                // 2. 先组织出一个最新的评论数据对象
+                // 3. 想办法，把第二步中，得到的评论对象，保存到 localStorage 中：
+                //  3.1 localStorage只支持存放字符串数据，要先调用JSON.stringify把数据变成字符串
+                //  3.2 在保存最新的评论数据之前，要先从localStorage获取到之前的评论数据（string），转换为 一个数组对象，然后把最新的评论，push到这个数组
+                //  3.3 如果获取到的 localStorage 中的评论字符串，为空不存在，则可以返回一个'[]'，让 JSON.parse 去转换，否则为空报错
+                //  3.4 把最新的评论列表数组，再次调用JSON.stringify转为数组字符串，然后调用localStorage.setItem()
+                let comment = {id: Date.now(), user: this.user, content: this.content} //第一步生成评论对象
+                // 从 localStorage 中获取所有的评论，如果没有则返回'[]'
+                let list = JSON.parse(localStorage.getItem('cmts') || '[]')
+                list.unshift(comment) //将评论push到第一条
+                // 在localstorage中重新保存最新的评论数据
+                localStorage.setItem('cmts', JSON.stringify(list))
+
+                this.user = this.content = ''  //把评论框的内容置空
+                // this.loadComments() // ?????
+                this.$emit('func')
+            }
+        }
+    }
+
+
+    let vm = new Vue({
+        el: '#app',
+        data: {
+            list: [
+                {id: Date.now(), user: '李白', content: '天生我材必有用'},
+                {id: Date.now(), user: '江小白', content: '劝君更尽一杯酒'},
+                {id: Date.now(), user: '小马', content: '我姓马，风吹草低见牛羊的马'}
+            ]
+        },
+        created() {
+            this.loadComments()
+        },
+        methods: {
+            loadComments() { // 从本地的 localStorage 中，加载评论列表
+                let list = JSON.parse(localStorage.getItem('cmts') || '[]')
+                this.list = list
+                console.log(list)
+            }
+        },
+        components: {
+            'cmt-box': commentBox
+        }
+    })
+</script>
+</body>
+</html>
+```
+
 ## 使用 `this.$refs` 来获取元素和组件
 
-```text
+```markup
   <div id="app">
     <div>
       <input type="button" value="获取元素内容" @click="getElement" />
