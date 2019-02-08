@@ -908,230 +908,218 @@ var register = Vue.extend({
   </script>
 ```
 
-## 命名视图实现经典布局
+## 命名视图实现经典布局（一个页面多个同级组件）
 
-1. 标签代码结构：
-
-   ```text
-   <div id="app">
-    <router-view></router-view>
-    <div class="content">
-      <router-view name="a"></router-view>
-      <router-view name="b"></router-view>
-    </div>
-   </div>
-   ```
-
-2. JS代码：
-
-   ```text
-   <script>
-    var header = Vue.component('header', {
-      template: '<div class="header">header</div>'
-    });
-
-    var sidebar = Vue.component('sidebar', {
-      template: '<div class="sidebar">sidebar</div>'
-    });
-
-    var mainbox = Vue.component('mainbox', {
-      template: '<div class="mainbox">mainbox</div>'
-    });
-
-    // 创建路由对象
-    var router = new VueRouter({
-      routes: [
-        {
-          path: '/', components: {
-            default: header,
-            a: sidebar,
-            b: mainbox
-          }
+```markup
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8'>    <title></title>
+    <script src='https://cdn.jsdelivr.net/npm/vue/dist/vue.js'></script>
+    <script src="https://unpkg.com/vue-router/dist/vue-router.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
         }
-      ]
-    });
 
-    // 创建 Vue 实例，得到 ViewModel
-    var vm = new Vue({
-      el: '#app',
-      data: {},
-      methods: {},
-      router
-    });
-   </script>
-   ```
+        .header {
+            background: red;
+            height: 100px;
+        }
 
-3. CSS 样式：
+        .container {
+            display: flex;
+            height: 500px;
+        }
 
-   ```text
-   <style>
-    .header {
-      border: 1px solid red;
+        .left {
+            background: lightblue;
+            flex: 2;
+        }
+
+        .main {
+            background: lightsalmon;
+            flex: 8;
+        }
+    </style>
+</head>
+<body>
+<div id='app'>
+    <router-view></router-view>
+    <div class="container">
+        <router-view name="left"></router-view>
+        <router-view name="main"></router-view>
+    </div>
+</div>
+</body>
+<script>
+    let header = {
+        template: "<h1 class='header'>Header头部区域</h1>"
     }
+    let leftBox = {
+        template: "<h1 class='left'>leftBox侧边栏区域</h1>"
+    }
+    let mainBox = {
+        template: "<h1 class='main'>MainBox主体区域</h1>"
+    }
+    let router = new VueRouter({
+        routes: [
+            {
+                path: '/', components: {
+                    'default': header,
+                    'left': leftBox,
+                    'main': mainBox
+                }
+            },
+            // {path:'/',component:header},
+            // {path:'/left',component:leftBox},
+            // {path:'/main',component:mainBox}
+        ]
+    })
+    // 实例化vue对象
+    let vm = new Vue({
+        // 绑定对象
+        el: '#app',
+        data: {},
+        methods: {},
+        router
+    })
+</script>
+</html>
+```
 
-    .content{
-      display: flex;
-    }
-    .sidebar {
-      flex: 2;
-      border: 1px solid green;
-      height: 500px;
-    }
-    .mainbox{
-      flex: 8;
-      border: 1px solid blue;
-      height: 500px;
-    }
-   </style>
-   ```
-
-## `watch`属性的使用
+## `watch`和`computed`监听事件
 
 考虑一个问题：想要实现 `名` 和 `姓` 两个文本框的内容改变，则全名的文本框中的值也跟着改变；（用以前的知识如何实现？？？）
 
-1. 监听`data`中属性的改变：
+```markup
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8'>
+    <title></title>
+    <script src='https://cdn.jsdelivr.net/npm/vue/dist/vue.js'></script>
+</head>
+<body>
+<div id='app'>
+    <!-- 分析 1、监听到文本框的改变-->
+    <h2>第一种，键盘事件监听，配合getFullname改变fullname</h2>
+    <input type="text" v-model="firstname" @keyup="getFullname"> +
+    <input type="text" v-model="lastname" @keyup="getFullname"> =
+    <input type="text" v-model="fullname">
+    <h2>第二种，使用watch监听</h2>
+    <input type="text" v-model="firstname2"> +
+    <input type="text" v-model="lastname2"> =
+    <input type="text" v-model="fullname2">
+    <h2>第三个，使用computed计算属性</h2>
+    <input type="text" v-model="firstname3"> +
+    <input type="text" v-model="lastname3"> =
+    <input type="text" v-model="fullname3">
+</div>
+</body>
+<script>
+    // 实例化vue对象
+    let vm = new Vue({
+        // 绑定对象
+        el: '#app',
+        data: {
+            firstname: '',
+            lastname: '',
+            fullname: '',
+            firstname2: '',
+            lastname2: '',
+            fullname2: '',
+            firstname3: '',
+            lastname3: '',
 
-   ```text
-   <div id="app">
-    <input type="text" v-model="firstName"> +
-    <input type="text" v-model="lastName"> =
-    <span>{{fullName}}</span>
-   </div>
-
-   <script>
-    // 创建 Vue 实例，得到 ViewModel
-    var vm = new Vue({
-      el: '#app',
-      data: {
-        firstName: 'jack',
-        lastName: 'chen',
-        fullName: 'jack - chen'
-      },
-      methods: {},
-      watch: {
-        'firstName': function (newVal, oldVal) { // 第一个参数是新数据，第二个参数是旧数据
-          this.fullName = newVal + ' - ' + this.lastName;
         },
-        'lastName': function (newVal, oldVal) {
-          this.fullName = this.firstName + ' - ' + newVal;
+        methods: {
+            getFullname() {
+                this.fullname = this.firstname + '-' + this.lastname
+            }
+        },
+        // 使用watch可以监视 data 中指定数据的变化，然后触发这个 watch 中对应的function处理函数
+        // 只要指定的自变量改变了，那监听的因变量也会改变
+        watch: {
+            'firstname2': function (newVal, oldVal) {
+                console.log("new:" + newVal + "--old:" + oldVal)
+                this.fullname2 = this.firstname2 + '-' + this.lastname2
+            },
+            'lastname2': function (newVal) {
+                this.fullname2 = this.firstname2 + '-' + newVal
+            }
+        },
+        // 在 computed 中可以定义一些 属性，这些属性，叫做【计算属性】，
+        // 计算属性的本质是一个方法，只不过，我们在使用这些计算属性的时候，把它们的名称，直接当做属性来使用的；并不会把计算属性当做方法来调用
+        // 注意：
+        // 计算属性，在引用的时候，一定不要加（）去调用，直接把他当做普通属性去使用就好
+        // 只要计算属性内部所用到的 data 发生变化，就会立即从新计算这个属性的值
+        // 计算属性的求值结果，会被缓存，方便下次直接使用，如果计算属性中方法内部的data数据没有发生变化则不重新计算
+        computed: {
+            'fullname3': function () { //computed计算属性，一定要有return返回值
+                return this.firstname3 + "-" + this.lastname3
+            },
         }
-      }
-    });
-   </script>
-   ```
+    })
+</script>
+</html>
+```
 
-2. 监听路由对象的改变：
+###  **watch-监听路由地址的改变**
 
-   ```text
-   <div id="app">
+```markup
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8'><title></title>
+    <script src='https://cdn.jsdelivr.net/npm/vue/dist/vue.js'></script>
+    <script src="https://unpkg.com/vue-router/dist/vue-router.js"></script>
+</head>
+<body>
+<div id='app'>
     <router-link to="/login">登录</router-link>
     <router-link to="/register">注册</router-link>
-
     <router-view></router-view>
-   </div>
+</div>
+</body>
+<script>
+    // 创建组件模板对象
+    let login = {
+        template: "<h1>登录组件</h1>",
 
-   <script>
-    var login = Vue.extend({
-      template: '<h1>登录组件</h1>'
-    });
-
-    var register = Vue.extend({
-      template: '<h1>注册组件</h1>'
-    });
-
-    var router = new VueRouter({
-      routes: [
-        { path: "/login", component: login },
-        { path: "/register", component: register }
-      ]
-    });
-
-    // 创建 Vue 实例，得到 ViewModel
-    var vm = new Vue({
-      el: '#app',
-      data: {},
-      methods: {},
-      router: router,
-      watch: {
-        '$route': function (newVal, oldVal) {
-          if (newVal.path === '/login') {
-            console.log('这是登录组件');
-          }
+    }
+    let register = {
+        template: "<h1>注册组件</h1>",
+    }
+    let router = new VueRouter({
+        routes: [
+            {path: '/', redirect: 'login'},
+            {path: '/login', component: login},
+            {path: '/register', component: register}
+        ]
+    })
+    // 实例化vue对象
+    let vm = new Vue({
+        // 绑定对象
+        el: '#app',
+        data: {},
+        methods: {},
+        router,
+        watch: {
+            "$route.path": function (newVal, oldVal) {
+                console.log("new:" + newVal + "--old:" + oldVal)
+                if (newVal == "/login") {
+                    console.log("欢迎进入登录页面")
+                } else if (newVal == "/register") {
+                    console.log("欢迎进入注册页面")
+                }
+            }
         }
-      }
-    });
-   </script>
-   ```
-
-## `computed`计算属性的使用
-
-1. 默认只有`getter`的计算属性：
-
-   ```text
-   <div id="app">
-    <input type="text" v-model="firstName"> +
-    <input type="text" v-model="lastName"> =
-    <span>{{fullName}}</span>
-   </div>
-
-   <script>
-    // 创建 Vue 实例，得到 ViewModel
-    var vm = new Vue({
-      el: '#app',
-      data: {
-        firstName: 'jack',
-        lastName: 'chen'
-      },
-      methods: {},
-      computed: { // 计算属性； 特点：当计算属性中所以来的任何一个 data 属性改变之后，都会重新触发 本计算属性 的重新计算，从而更新 fullName 的值
-        fullName() {
-          return this.firstName + ' - ' + this.lastName;
-        }
-      }
-    });
-   </script>
-   ```
-
-2. 定义有`getter`和`setter`的计算属性：
-
-   ```text
-   <div id="app">
-    <input type="text" v-model="firstName">
-    <input type="text" v-model="lastName">
-    <!-- 点击按钮重新为 计算属性 fullName 赋值 -->
-    <input type="button" value="修改fullName" @click="changeName">
-
-    <span>{{fullName}}</span>
-   </div>
-
-   <script>
-    // 创建 Vue 实例，得到 ViewModel
-    var vm = new Vue({
-      el: '#app',
-      data: {
-        firstName: 'jack',
-        lastName: 'chen'
-      },
-      methods: {
-        changeName() {
-          this.fullName = 'TOM - chen2';
-        }
-      },
-      computed: {
-        fullName: {
-          get: function () {
-            return this.firstName + ' - ' + this.lastName;
-          },
-          set: function (newVal) {
-            var parts = newVal.split(' - ');
-            this.firstName = parts[0];
-            this.lastName = parts[1];
-          }
-        }
-      }
-    });
-   </script>
-   ```
+    })
+</script>
+</html>
+```
 
 ## `watch`、`computed`和`methods`之间的对比
 
@@ -1141,7 +1129,13 @@ var register = Vue.extend({
 
 ## `nrm`的安装使用
 
-作用：提供了一些最常用的NPM包镜像地址，能够让我们快速的切换安装包时候的服务器地址； 什么是镜像：原来包刚一开始是只存在于国外的NPM服务器，但是由于网络原因，经常访问不到，这时候，我们可以在国内，创建一个和官网完全一样的NPM服务器，只不过，数据都是从人家那里拿过来的，除此之外，使用方式完全一样； 1. 运行`npm i nrm -g`全局安装`nrm`包； 2. 使用`nrm ls`查看当前所有可用的镜像源地址以及当前所使用的镜像源地址； 3. 使用`nrm use npm`或`nrm use taobao`切换不同的镜像源地址；
+作用：提供了一些最常用的NPM包镜像地址，能够让我们快速的切换安装包时候的服务器地址； 什么是镜像：原来包刚一开始是只存在于国外的NPM服务器，但是由于网络原因，经常访问不到，这时候，我们可以在国内，创建一个和官网完全一样的NPM服务器，只不过，数据都是从人家那里拿过来的，除此之外，使用方式完全一样；
+
+1. 运行`npm i nrm -g`全局安装`nrm`包； 
+
+2. 使用`nrm ls`查看当前所有可用的镜像源地址以及当前所使用的镜像源地址； 
+
+3. 使用`nrm use npm`或`nrm use taobao`切换不同的镜像源地址；
 
 ## 相关文件
 
