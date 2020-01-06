@@ -12,3 +12,11 @@
 
 webpack
 
+vuex组件通讯
+
+axios http请求包
+
+vuecli脚手架
+
+babel  es6-ES5转化
+
