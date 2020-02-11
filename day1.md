@@ -25,6 +25,10 @@
   * 1. 从Jquery 切换到 Zepto
   * 1. 从 EJS 切换到 art-template
 
+### 使webstorm不对含vue的html报错的方式：
+
+在改文件当前目录下安装有vue库即可，可以使用npm命令，先在当前目录下使用npm init初始化一个node项目然后npm install vue即可支持vue语法不报错
+
 ## Node（后端）中的 MVC 与 前端中的 MVVM 之间的区别
 
 * MVC 是后端的分层开发概念；
@@ -35,8 +39,7 @@
 
 ### Vue.js 基本代码 和 MVVM 之间的对应关系
 
-{% code-tabs %}
-{% code-tabs-item title="第一个Vue" %}
+{% code title="第一个Vue" %}
 ```markup
 <!DOCTYPE html>
 <html lang="en">
@@ -69,13 +72,11 @@
 </body>
 </html>
 ```
-{% endcode-tabs-item %}
-{% endcode-tabs %}
+{% endcode %}
 
 ### Vue`基本的代码结构、插值表达式、v-cloak、v-text、v-html`
 
-{% code-tabs %}
-{% code-tabs-item title="v-cloak,v-text,v-html的学习.html" %}
+{% code title="v-cloak,v-text,v-html的学习.html" %}
 ```markup
 <!DOCTYPE html>
 <html lang="en">
@@ -90,7 +91,7 @@
 </head>
 <body>
 <div id="app">
-    <!-- 使用v-cloak可以解决插值表达式闪烁问题 -->
+    <!-- 使用v-cloak可以解决插值表达式闪烁问题（网络差时替换慢） -->
     <h1 v-cloak>===={{msg}}====</h1>
     
     <!-- 默认 v-text 没有闪烁问题的 -->
@@ -120,8 +121,7 @@
 </script>
 </html>
 ```
-{% endcode-tabs-item %}
-{% endcode-tabs %}
+{% endcode %}
 
 ### Vue指令之`v-bind`的和`v-on`
 
@@ -131,8 +131,7 @@
 
 **指令名`v-on`简化指令`@`**
 
-{% code-tabs %}
-{% code-tabs-item title="v-bind,v-on的学习.html" %}
+{% code title="v-bind,v-on的学习.html" %}
 ```markup
 <!DOCTYPE html>
 <html lang="en">
@@ -142,10 +141,11 @@
 </head>
 <body>
     <div id="app">
-        <!-- v-bind:是vue中提供绑定属性的指令,把后面属性值变成表达式 -->
+        <!-- v-bind:是vue中提供标签里绑定属性的指令,把后面属性值变成表达式,并且支持拼接 -->
         <!-- 属性里不能使用插值表达式，因为会全当成字符串 -->
         <input type="button" value="按钮1" v-bind:title="mytitle+'123'" v-on:click="alert">
         <!-- 按钮鼠标悬停显示这是自定义title123 -->
+        <input type="button" value="按钮2" v-bind:title="mytitle+'123'+mytitle" v-on:click="alert">
         <!-- v-bind可以简写为一个冒号（:） -->
         <!-- v-on可以简写为一个@ -->
         <input type="button" value="按钮2" :title="mytitle" @click="alert">
@@ -185,8 +185,7 @@
 
 </html>
 ```
-{% endcode-tabs-item %}
-{% endcode-tabs %}
+{% endcode %}
 
 ### 跑马灯效果
 
@@ -198,15 +197,15 @@
     <title>跑马灯效果</title>
 </head>
 <body>
-    <div id="app">
-        <input type="button" value="跑起来" v-on:click="star">
-        <input type="button" value="停下来" @click="end">
-        <!--事件绑定操作还能加个括号，这样就能传参了-->
-        <!--<input type="button" value="停下来" @click="end()">-->
-        <h3>{{msg}}</h3>
-    </div>
+<div id="app">
+    <input type="button" value="跑起来" v-on:click="star">
+    <input type="button" value="停下来" @click="end">
+    <!--事件绑定操作还能加个括号，这样就能传参了-->
+    <!--<input type="button" value="停下来" @click="end()">-->
+    <h3>{{msg}}</h3>
+</div>
 </body>
-<script src="lib/vue.js"></script>
+<script src="./vue.js"></script>
 
 <script>
     let vm = new Vue({
@@ -224,7 +223,7 @@
         //             return  //如果不加这个判断，那么跑马速度越来越快
         //         }
         //         let _this = this  //匿名函数this是windows，所以要替换this
-        //         this.myInterval = setInterval(function () {
+        //         this.myInterval = setInterval(function(){ //这个是匿名函数
         //             // console.log(this)  //this是window
         //             // console.log(_this)  //_this是vue
         //             let first = _this.msg.substring(0,1)
@@ -241,20 +240,22 @@
         methods:{
             star:function(){
                 // console.log(this.msg)
-                console.log(this)  //this是vue
+                console.log(this);  //this是vue
                 // 如果已经定义，则不再向下执行
                 if(this.myInterval){
                     return  //如果不加这个判断，那么跑马速度越来越快
                 }
+                // setInterval设置一个周期的计时器事件
                 this.myInterval = setInterval(()=>{
-                    console.log(this)  //匿名函数this是vue
-                    let first = this.msg.substring(0,1)
-                    let rest = this.msg.substring(1)
+                    console.log(this); //匿名函数this是vue
+                    let first = this.msg.substring(0,1);
+                    let rest = this.msg.substring(1);
                     this.msg = rest+first
-                },200)
+                },200) // 每点击一次把成功的结果给myInterval
+                // 下次点击时判断myInterval，如果已有一个计时器时间则不执行
             },
             end(){
-                clearInterval(this.myInterval)
+                clearInterval(this.myInterval);
                 this.myInterval = null
             }
         }
@@ -594,16 +595,16 @@
 
 ```markup
 <ul>
-  <li v-for="(item, i) in list">索引:{{i}}---姓名:{{item.name}}---年龄:{{item.age}}</li>
+  <li v-for="(item, i) in list">
+  索引:{{i}}---姓名:{{item.name}}---年龄:{{item.age}}</li>
 </ul>
 ```
 
 * 迭代对象中的属性
 
-```text
-    <!-- 循环遍历对象身上的属性 -->
-
-    <div v-for="(val, key, i) in userInfo">{{val}} --- {{key}} --- {{i}}</div>
+```markup
+<!-- 循环遍历对象身上的属性 -->
+<div v-for="(val, key, i) in userInfo">{{val}} --- {{key}} --- {{i}}</div>
 ```
 
 * 迭代数字
@@ -618,8 +619,7 @@
 
 为了给 Vue 一个提示，**以便它能跟踪每个节点的身份，从而重用和重新排序现有元素**，你需要为每项提供一个唯一 key 属性。
 
-{% code-tabs %}
-{% code-tabs-item title="v-for和key使用汇总" %}
+{% code title="v-for和key使用汇总" %}
 ```markup
 <!DOCTYPE html>
 <html>
@@ -696,8 +696,7 @@
     </script>
 </html>
 ```
-{% endcode-tabs-item %}
-{% endcode-tabs %}
+{% endcode %}
 
 ### Vue指令之`v-if`和`v-show`
 
