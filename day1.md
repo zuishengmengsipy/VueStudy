@@ -302,7 +302,7 @@
                 <input type="button" value="点我" @click.stop="btnHandler">
             </div>
 
-            <h2>.prevent阻止默认行为</h2>
+            <h2>.prevent阻止默认行为，阻止a标签的默认跳转</h2>
             <a href="http://baidu.com" @click.prevent="linkClick">百度一下</a>
 
             <h2>.capture:添加事件侦听器时使用事件捕获模式</h2>
