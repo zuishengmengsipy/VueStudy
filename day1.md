@@ -591,21 +591,33 @@
 
 ### Vue指令之`v-for`和`key`属性
 
-* 迭代数组
-
+{% code title="迭代数组" %}
 ```markup
 <ul>
-  <li v-for="(item, i) in list">
+  <li v-for="(item, i) in list"><!--i是索引-->
   索引:{{i}}---姓名:{{item.name}}---年龄:{{item.age}}</li>
 </ul>
+
+<!--list: [{name:"wlx",age:45},{name:"ete",age:78}]-->
+<!--
+索引:0---姓名:wlx---年龄:45
+索引:1---姓名:ete---年龄:78
+-->
 ```
+{% endcode %}
 
-* 迭代对象中的属性
-
+{% code title="迭代对象中的属性" %}
 ```markup
-<!-- 循环遍历对象身上的属性 -->
-<div v-for="(val, key, i) in userInfo">{{val}} --- {{key}} --- {{i}}</div>
+<!-- 循环遍历对象身上的属性.i -->
+<div v-for="(val, key, i) in userInfo">{{key}} --- {{val}} --- {{i}}</div>
+<!--obj: {name:"wlx",age:45, weight:98}-->
+<!--
+name --- wlx --- 0
+age --- 45 --- 1
+weight --- 98 --- 2
+-->
 ```
+{% endcode %}
 
 * 迭代数字
 
@@ -642,10 +654,10 @@
             <!-- 迭代数字 -->
             <p v-for="count in 10">这是第{{count}}次循环</p><hr>
 
-            <!-- 在2.2.0+的版本里面，当在组件找那个使用v-for必须加key属性(用v-bind绑定) -->
-            <!--当Vue.js用V-for更新已渲染过的元素列表时，它默认用“就地复用”策略。如果数据项的顺序被改变，-->
-            <!--Vue将不是移动DOM元素来匹配数据项的顺序，而是简单复用此处每个元素，并且确保它在特定素引下显示已被渲染过的每个元素。-->
-            <!--这种显示不会保证顺序，为了给Vue一个提示，使其跟踪每个节点的身份，重用和重新排序现有元素，需要为每项提供一个唯一key属性。-->
+<!-- 在2.2.0+的版本里面，当在组件找那个使用v-for必须加key属性(用v-bind绑定) -->
+<!--当Vue.js用V-for更新已渲染过的元素列表时，它默认用“就地复用”策略。如果数据项的顺序被改变，-->
+<!--Vue将不是移动DOM元素来匹配数据项的顺序，而是简单复用此处每个元素，并且确保它在特定素引下显示已被渲染过的每个元素。-->
+<!--这种显示不会保证顺序，为了给Vue一个提示，使其跟踪每个节点的身份，重用和重新排序现有元素，需要为每项提供一个唯一key属性。-->
             <div>
                 <lable>Id:
                     <input type="text" v-model="id">
@@ -660,9 +672,7 @@
             <p v-for="item in list2" :key="item.id" >
                 <input type="checkbox">{{item.id}}----{{item.name}}
             </p>
-
         </div>
-
     </body>
     <script>
         // 实例化vue对象
