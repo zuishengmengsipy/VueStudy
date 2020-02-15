@@ -732,12 +732,6 @@ weight --- 98 --- 2
     <body>
         <div id='app'>
             <input type="button" @click="flag=!flag" value="toggle">
-            <!-- v-if的特点：每次都会重新删除或创建元素 -->
-            <!-- v-show的特点：每次不会进行DOM的删除和创建，只是切换元素display:none样式 -->
-            <!-- v-if有较高的切换性能消耗 -->
-            <!-- v-show可能有较高的初始渲染消耗 -->
-            <!-- 如果元素涉及到频繁切换，最好不用v-if -->
-            <!-- 如果元素可能永远不会被显示出来则推荐使用v-if -->
             <h3 v-if="flag">这是用v-if控制的</h3>
             <h3 v-show="flag">这是用v-show控制的</h3>
         </div>
@@ -757,6 +751,4 @@ weight --- 98 --- 2
     </script>
 </html>
 ```
-
-
 
