@@ -1,6 +1,6 @@
 # day2
 
-## 品牌管理案例
+## 品牌管理案例（看不懂没关系，下面是拆分讲解）
 
 ```markup
 <!DOCTYPE html>
@@ -230,9 +230,7 @@
 
 ### 根据条件筛选品牌
 
-1. 1.x 版本中的filterBy指令，在2.x中已经被废除：
-
-[filterBy - 指令](https://v1-cn.vuejs.org/api/#filterBy)
+在1.x 版本中的filterBy指令，在2.x中已经被废除：[filterBy - 指令](https://v1-cn.vuejs.org/api/#filterBy)
 
 ```markup
 <tr v-for="item in list | filterBy searchName in 'name'">
@@ -245,19 +243,18 @@
 </tr>
 ```
 
+**2.x常用的绑定方式（这里只是自己写筛选函数，不是过滤器，过滤器需要用 \|）**
+
 1. 在2.x版本中[手动实现筛选的方式](https://cn.vuejs.org/v2/guide/list.html#显示过滤-排序结果)：
 2. 筛选框绑定到 VM 实例中的 `searchName` 属性：
+3. 在使用 `v-for` 指令循环每一行数据的时候，不再直接 `item in list`，而是 `in` 一个 过滤的methods 方法，同时，把过滤条件`searchName`传递进去：
+4. `search` 过滤方法中，**使用 数组的 `filter` 方法进行过滤，最后一定要返回过滤或排序后的数组**：
 
 ```markup
 <hr> 输入筛选名称：
-<input type="text" v-model="searchName">
-```
-
-* 在使用 `v-for` 指令循环每一行数据的时候，不再直接 `item in list`，而是 `in` 一个 过滤的methods 方法，同时，把过滤条件`searchName`传递进去：
-
-```markup
+<input type="text" v-model="searchName"><!--双向绑定一个数据-->
 <tbody>
-      <tr v-for="item in search(searchName)">
+      <tr v-for="item in search(searchName)"><!--含有该数据的对象才会显示-->
         <td>{{item.id}}</td>
         <td>{{item.name}}</td>
         <td>{{item.ctime}}</td>
@@ -265,24 +262,28 @@
           <a href="#" @click.prevent="del(item.id)">删除</a>
         </td>
       </tr>
-    </tbody>
-```
-
-* `search` 过滤方法中，使用 数组的 `filter` 方法进行过滤：
-
-```javascript
-search(name) {
-  return this.list.filter(x => {
-    return x.name.indexOf(name) != -1;
-  });
+</tbody><!--自定义过滤器方法,filter详情见下方-->
+search(name) { 
+  return this.list.filter(x => x.name.indexOf(name) != -1);
 }
 ```
+
+### **ES6数组方法回忆**
+
+* **Array.every\(x=&gt;x\)是每一个都要满足**
+* **Array.some\(x=&gt;x\)是有一个满足。**
+* **Array.find（条件）返回符合条件的第一个值。**
+* **Array.filter（条件），条件为函数，保存所有满足条件的项，组成新的数组**
+
+数组的方法分为两类
+
+1）改变原数组**：**push,pop,shift,unshift,sort,reverse,splice
+
+2）不改变原数组concat,join,split，toStringpush：从数组最后一位开始加数据
 
 ## 过滤器
 
 概念：Vue.js 允许你自定义过滤器，**可被用作一些常见的文本格式化**。过滤器可以用在两个地方：**mustache 插值和 v-bind 表达式**。过滤器应该被添加在 JavaScript 表达式的尾部，由“管道”符指示；
-
-### 私有过滤器
 
 HTML元素：
 
@@ -290,15 +291,48 @@ HTML元素：
 <td>{{item.ctime | dataFormat('yyyy-mm-dd')}}</td>
 ```
 
-私有 `filters` 定义方式：要写在
+> 注意：当有局部和全局两个名称相同的过滤器时候，会以就近原则进行调用，即：局部过滤器优先于全局过滤器被调用！
+
+### 全局过滤器
+
+全局过滤器，直接写在script标签里面不需要写在new vue里
+
+```javascript
+Vue.filter('dataFormat', function (ctime, pattern = '') {
+  //filter第一个参数为过滤器引用名，后面为过滤函数
+  //function的第一个参数为管道符前面的需要过滤的变量，第二个及以后参数是管道符后面的函数的参数
+  var dt = new Date(ctime);//传进来当前时间，根据当前时间来生成时间
+  // 获取年月日
+  var y = dt.getFullYear();
+  var m = (dt.getMonth() + 1).toString().padStart(2, '0');
+  var d = dt.getDate().toString().padStart(2, '0');
+  // 如果 传递进来的字符串类型，转为小写之后，等于 yyyy-mm-dd，那么就返回 年-月-日
+  // 否则，就返回  年-月-日 时：分：秒
+  if (pattern.toLowerCase() === 'yyyy-mm-dd') {
+    return `${y}-${m}-${d}`;
+  } else {
+    // 获取时分秒
+    var hh = dt.getHours().toString().padStart(2, '0');
+    var mm = dt.getMinutes().toString().padStart(2, '0');
+    var ss = dt.getSeconds().toString().padStart(2, '0');
+    return `${y}-${m}-${d} ${hh}:${mm}:${ss}`;
+  }
+});
+```
+
+### 私有过滤器
+
+私有 `filters` 定义方式：要写在new vue 里面
 
 ```javascript
 filters: { 
 // 私有局部过滤器，只能在 当前 VM 对象所控制的 View 区域进行使用
 // 要写在new Vue({这里面})
-    dataFormat(input, pattern = "") { 
+// 函数名即为过滤器的引用名，第一个参数为管道符前面的需要过滤的变量，
+// 第二个及以后参数是管道符后面的函数的参数
+    dataFormat(ctime, pattern = "") { 
     // 在参数列表中 通过 pattern="" 来指定形参默认值，防止报错
-      var dt = new Date(input);
+      var dt = new Date(ctime);
       // 获取年月日
       var y = dt.getFullYear();
       var m = (dt.getMonth() + 1).toString().padStart(2, '0');
@@ -320,51 +354,44 @@ filters: {
 
 > 使用ES6中的字符串新方法 String.prototype.padStart\(maxLength, fillString=''\) 或 String.prototype.padEnd\(maxLength, fillString=''\)来填充字符串；
 
-### 全局过滤器
-
-```javascript
-Vue.filter('dataFormat', function (input, pattern = '') {
-  var dt = new Date(input);
-  // 获取年月日
-  var y = dt.getFullYear();
-  var m = (dt.getMonth() + 1).toString().padStart(2, '0');
-  var d = dt.getDate().toString().padStart(2, '0');
-  // 如果 传递进来的字符串类型，转为小写之后，等于 yyyy-mm-dd，那么就返回 年-月-日
-  // 否则，就返回  年-月-日 时：分：秒
-  if (pattern.toLowerCase() === 'yyyy-mm-dd') {
-    return `${y}-${m}-${d}`;
-  } else {
-    // 获取时分秒
-    var hh = dt.getHours().toString().padStart(2, '0');
-    var mm = dt.getMinutes().toString().padStart(2, '0');
-    var ss = dt.getSeconds().toString().padStart(2, '0');
-    return `${y}-${m}-${d} ${hh}:${mm}:${ss}`;
-  }
-});
-```
-
-> 注意：当有局部和全局两个名称相同的过滤器时候，会以就近原则进行调用，即：局部过滤器优先于全局过滤器被调用！
-
 ### 键盘修饰符以及自定义键盘修饰符
 
-#### 1.x中自定义键盘修饰符【了解即可】
-
-```javascript
-Vue.directive('on').keyCodes.f2 = 113;
+```markup
+<!-- vue对应的按键事件绑定是 v-on:keyup.自定义按键变量  
+或者 @keyup.自定义按键变量 ,这里按键变量就是f2-->
+<!-- 在input输入框里面添加键盘事件,当键盘按下f2的时候会发出113键盘码,
+自定义的按键事件f2可以捕捉到113键盘码-->
+<div id="test">
+    <input type="text" @keyup.f2="show" @keyup.enter="show"/>
+    <!-- 注意keyup事件只能用在input里面-->
+    <!-- 而且只有光标在input里面的时候输入按键会触发-->
+    <!-- 在登陆界面,你可以为所有需要输入的input都设置keyup事件-->
+    <input type="button" @click.prevent="show" value="button"/> <br/>
+    <p>点击button按钮,查看弹窗, <br/>或者</p>
+</div>
+<script>
+    Vue.config.keyCodes.f2 = 113;
+    var vm1 = new Vue({
+        el:"#test",
+        methods:{
+            show: function () {
+                alert("登陆成功")
+            }
+        }
+    });
+</script>
 ```
 
-#### [2.x中自定义键盘修饰符](https://cn.vuejs.org/v2/guide/events.html#键值修饰符)
+#### 自定义键盘修饰符（分为vue1.x和vue2.x两个版本的定义方式）
 
-通过`Vue.config.keyCodes.名称 = 按键值`来自定义案件修饰符的别名：
+Vue 提供了绝大多数常用的按键码的别名：
 
-```javascript
-Vue.config.keyCodes.f2 = 113;
-```
-
-使用自定义的按键修饰符：
+.enter .tab .delete \(捕获“删除”和“退格”键\) .esc .space .up .down .left .right
 
 ```javascript
-<input type="text" v-model="name" @keyup.f2="add">
+Vue.config.keyCodes.f2 = 113;//vue2.x版本定义键盘修饰符
+Vue.directive('on').keyCodes.f2 = 113; //vue1.x版本定义键盘修饰符
+<input type="text" @keyup.f2="show" @keyup.enter="show"/>//使用
 ```
 
 ## [自定义指令](https://cn.vuejs.org/v2/guide/custom-directive.html)
