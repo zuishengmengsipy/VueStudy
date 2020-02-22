@@ -484,6 +484,8 @@ Vue.elementDirective('red-color', {
 
 ## [vue-resource 实现 get, post, jsonp请求](https://github.com/pagekit/vue-resource)
 
+**vue-resource是Vue.js的一款插件**，它可以通过XMLHttpRequest或JSONP发起请求并处理响应。也就是说，$.ajax能做的事情，vue-resource插件一样也能做到，而且vue-resource的API更为简洁。另外，vue-resource还提供了非常有用的inteceptor功能，使用inteceptor可以在请求前和请求后附加一些行为，比如使用inteceptor在ajax请求时显示loading界面。
+
 除了 vue-resource 之外，还可以使用 `axios` 的第三方包实现实现数据的请求 1. 之前的学习中，如何发起数据请求？ 2. 常见的数据请求类型？ get post jsonp 3. 测试的URL请求资源地址：
 
 * get请求地址：[http://www.liulongbin.top:3005/api/getlunbo](http://www.liulongbin.top:3005/api/getlunbo)
