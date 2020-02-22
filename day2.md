@@ -399,24 +399,45 @@ Vue.directive('on').keyCodes.f2 = 113; //vue1.x版本定义键盘修饰符
 自定义全局和局部的 自定义指令：
 
 ```javascript
-// 自定义全局指令 v-focus，为绑定的元素自动获取焦点：
-    Vue.directive('focus', {
-      inserted: function (el) { // inserted 表示被绑定元素插入父节点时调用
-        el.focus();
-      }
-    });
+// 自定义全局指令
+// 使用 vue.directive()定义全局的指令 下例：V-focus,V-color8
+// 参数1：指令的名称，注意，在定义的时候，指令的名称前面，不需要加v-前缀，
+//       但在调用的时候，必须在指令名称前加上v-前缀来进行调用
+// 参数2：是一个对象，这个对象身上，有一些指令相关的函数，
+//       这些函数可以在特定的阶段，执行相关的操作
+Vue.directive('focus', {
+// 每当指令绑定到元素上的时候(读到内存的时候)，会立刻执行这个 bind 函数，只执行一次
+    bind: function (el) {// 和样式有关的放在bind
+    //在每个函数中，第一个参数永远是el，表示被绑定了指令的那个元素，这个el参数是一个原生的JS对象
+    // el.focus()  该操作不生效，时机不对
+    },  
+    inserted: function (el) { //和js有关的行为放在inserted
+        el.focus()
+    },  //inserted表示元素插入到DOM中的时候(插到页面的时候)，会执行 inserted 函数【触发一次】
+    updated: function () {
+    },  //当VNode（组件）更新的时候，会执行 updated ，可能会触发多次
+})
+Vue.directive('color', {
+    bind: function (el, binding) {
+    //第一个参数表示被绑定的那个元素，第二个参数为V-color=“xxx”的xxxx
+        console.log(binding)
+        el.style.color = binding.value
+    },  //每当指令绑定到元素上的时候，会立刻执行这个 bind 函数，只会执行一次
+})
+
 // 自定义局部指令 v-color 和 v-font-weight，为绑定的元素设置指定的字体颜色和字体粗细：
 // 自定义局部指令要写在new Vue({这里面})
-      directives: {
-        color: { // 为元素设置指定的字体颜色
-          bind(el, binding) {
-            el.style.color = binding.value;
-          }
-        },
-        'font-weight': function (el, binding2) { // 自定义指令的简写形式，等同于定义了 bind 和 update 两个钩子函数
-          el.style.fontWeight = binding2.value;
-        }
-      }
+directives: {
+  color: { // 为元素设置指定的字体颜色
+    bind(el, binding) {
+      el.style.color = binding.value;
+    }
+  },
+  'font-weight': function (el, binding2) { 
+// 自定义指令的简写形式，等同于定义了 bind 和 update 两个钩子函数
+    el.style.fontWeight = binding2.value;
+  }
+}
 ```
 
 1. 自定义指令的使用方式：
@@ -452,8 +473,8 @@ Vue.elementDirective('red-color', {
   * 创建期间的生命周期函数：
     * beforeCreate：实例刚在内存中被创建出来，此时，还没有初始化好 data 和 methods 属性
     * created：实例已经在内存中创建OK，此时 data 和 methods 已经创建OK，此时还没有开始 编译模板
-    * beforeMount：此时已经完成了模板的编译，但是还没有挂载到页面中
-    * mounted：此时，已经将编译好的模板，挂载到了页面指定的容器中显示
+    * beforeMount（挂载前）：此时已经完成了模板的编译，但是还没有挂载到页面中
+    * mounted（挂载）：此时，已经将编译好的模板，挂载到了页面指定的容器中显示
   * 运行期间的生命周期函数：
     * beforeUpdate：状态更新之前执行此函数， 此时 data 中的状态值是最新的，但是界面上显示的 数据还是旧的，因为此时还没有开始重新渲染DOM节点
     * updated：实例更新完毕之后调用此函数，此时 data 中的状态值 和 界面上显示的数据，都已经完成了更新，界面已经被重新渲染好了！
