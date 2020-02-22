@@ -149,6 +149,8 @@
         <!-- v-bind可以简写为一个冒号（:） -->
         <!-- v-on可以简写为一个@ -->
         <input type="button" value="按钮2" :title="mytitle" @click="alert">
+        <!-- @可以后面直接接语句类似@click="comName='login'" ，这样可以直接修改vue对象里data的属性值-->
+        <!-- 上面一行的用法具体表现在动画，获取焦点的动画切换等地方 -->
     </div>
 
 </body>

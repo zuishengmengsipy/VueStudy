@@ -525,7 +525,7 @@ vue-resource 的配置步骤：
 <script src="lib/vue-resource-1.3.4.js"></script>
 <script>
     let vm = new Vue({
-        el: ".app",
+        el: ".app", //和类绑定
         data: {},
         methods: {
             getInfo() {
@@ -572,7 +572,7 @@ postInfo() {
     var url = 'http://127.0.0.1:8899/api/post';
     // post 方法接收三个参数：
     // 参数1： 要请求的URL地址
-    // 参数2： 要发送的数据对象
+    // 参数2： 要发送的表单数据
     // 参数3： 指定post提交的编码类型为 application/x-www-form-urlencoded
     this.$http.post(url, { name: 'zs' }, { emulateJSON: true }).then(res => {
     console.log(res.body);
@@ -591,7 +591,7 @@ jsonpInfo() { // JSONP形式从服务器获取数据
 }
 ```
 
-### 品牌管理改造
+### 品牌管理改造（运行不出来，因为测试网站挂了，但是设计思路很好）
 
 ```markup
 <html>
@@ -660,7 +660,7 @@ jsonpInfo() { // JSONP形式从服务器获取数据
             return `${year}-${month}-${day} ${hour}:${minute}:${second}`
         }
     })
-    Vue.http.options.root = "http://mycode.com/"
+    Vue.http.options.root = "http://mycode.com/" // 设置根目录。下面请求路径可以少写
     Vue.http.options.emulateJSON = true
     // 实例化vue对象
     let vm = new Vue({
@@ -681,7 +681,7 @@ jsonpInfo() { // JSONP形式从服务器获取数据
                     return
                 }
                 this.$http.post("vuejs/phpcode/post.php", {name: this.name}).then(res => {
-                    if (res.status !== 0) {
+                    if (res.status !== 0) { // 提交表单，如果成果则进行数据替换
                         this.getAllList()
                     } else {
                         alert("出错了")
@@ -689,11 +689,11 @@ jsonpInfo() { // JSONP形式从服务器获取数据
                 })
                 this.name = ''
             },
-            getAllList() {
+            getAllList() { // get请求得到数据库的内容，把list替换成数据库的内容
                 this.$http.get("vuejs/phpcode/get.php").then(res => {
                     console.log(res)
                     if (res.status !== 0) {
-                        this.list = res.body.message
+                        this.list = res.body.message  // 替换
                     } else {
                         alert("获取数据失败!")
                     }
@@ -710,7 +710,7 @@ jsonpInfo() { // JSONP形式从服务器获取数据
                 })
             },
         },
-        created() {
+        created() {  //最先执行这个
             this.getAllList()
         },
     })
