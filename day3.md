@@ -2,10 +2,14 @@
 
 ## 定义Vue组件
 
+> 组件可以理解成可以复用的vue对象
+
 什么是组件： 组件的出现，就是为了拆分Vue实例的代码量的，能够让我们以不同的组件，来划分不同的功能模块，将来我们需要什么样的功能，就可以去调用对应的组件即可； 组件化和模块化的不同：
 
 * 模块化： 是从代码逻辑的角度进行划分的；方便代码分层开发，保证每个功能模块的职能单一；
 * 组件化： 是从UI界面的角度进行划分的；前端的组件化，方便UI组件的重用；
+
+> Vue组件需要注册后才可以使用。注册有全局注册和局部注册两种方式。
 
 ### **全局组件定义的三种方式**
 
@@ -20,7 +24,7 @@
     </head>
     <body>
         <!--自定义组件使用时一定要被vue绑定的标签包裹，否则无效，例如下面一行的注释-->
-        <!--<my-com1></my-com1>  无效-->
+        <!--<my-com1></my-com1>无效，要在外面套有被vue绑定的div等-->
         <div id='app'>
             <!-- 如果使用组件，直接，把组件的名称，以HTML标签的形式，引入到页面中，即可 -->
             <!-- 定义的时候可以用驼峰法，调用时大写变小写，中间加“-” -->
@@ -46,7 +50,9 @@
         // 1.1、使用Vue.extend 来创建全局的Vue组件
         let com1 = Vue.extend({
             // 通过template属性，指定了组件要展示的HTML结构
-            template:'<h3>这是用Vue.extend创建的组件</h3>'//内部必须只有一个根节点
+            template:'<h3>这是用Vue.extend创建的组件</h3>'
+            //template的DOM结构必须被一个元素包含，缺少<div></div>会无法渲染并报错。
+            //内部必须只有一个根节点
         })
         // 1.2、使用Vue.component('组件的名称',创建出来的的组件模板对象)
         // 定义的时候可以用驼峰法，但是调用时必须使用“-”，否则无效
@@ -55,11 +61,11 @@
         // 2.1、合并写法
         Vue.component('mycom2',Vue.extend({
             // 通过temloate属性，指定了组件要展示的HTML结构
-            template:'<h3>这是用Vue.component两步合并创建的组件</h3>'//内部必须只有一个根节点
+            template:'<h3>这是用Vue.component两步合并创建的组件</h3>'
         }))
         // 2.2、简化写法
         Vue.component('mycom3',{
-            template:'<h3>这是用Vue.component一步创建的组件</h3>'//内部必须只有一个根节点
+            template:'<h3>这是用Vue.component一步创建的组件</h3>'
         })
         
         // 3.1、指定写法，指定组件的部分
@@ -144,63 +150,71 @@
 
 ```markup
 <html>
-    <head>
-        <meta charset='utf-8'>
-        <title></title>
-        <script src='https://cdn.jsdelivr.net/npm/vue/dist/vue.js'></script>
-    </head>
-    <body>
-        <div id='app'>
-            <mycom1></mycom1>
+<head>
+    <meta charset='utf-8'>
+    <title></title>
+    <script src='https://cdn.jsdelivr.net/npm/vue/dist/vue.js'></script>
+</head>
+<body>
+<div id='app'>
+    <mycom1></mycom1>
 
-            <counter></counter>
-            <hr>
-            <counter></counter>
-            <hr>
-            <counter></counter>
-        </div>
-        <template id="counter">
-            <div>
-                <input type="button" value="+1" @click="increment">
-                <h3>{{count}}</h3>
-            </div>
-        </template>
-    </body>
-    <script>
-        // 1、组件可以有自己的 data 数据
-        // 2、组件的 data 和 实例的data 有一点不一样，实例中的data可以为一个对象，但是组件中的data必须是一个方法
-        // 3、组件中的data 除了必须为一个方法外，这个方法内部，还必须返回一个对象才行
-        Vue.component('mycom1',{
-            template:'<h1>这是全局组件.data:{{msg}}</h1>',
-            data:function(){
-                return {
-                    msg:'这是data里的信息'
-                }
+    <counter></counter>
+    <hr>
+    <counter></counter>
+    <hr>
+    <counter></counter>
+</div>
+<template id="counter">
+    <div>
+        <input type="button" value="+1" @click="increment">
+        <h3>{{count}}</h3>
+    </div>
+</template>
+</body>
+<script>
+    // 1、组件可以有自己的 data 数据
+    // 2、组件的data和实例的data不一样，实例data可以为一个对象，组件的data必须是一个方法
+    // 3、组件中的data 除了必须为一个方法外，这个方法内部，还必须返回一个对象才行
+    Vue.component('mycom1',{
+        template:'<h1>这是全局组件.data:{{msg}}</h1>',
+        data:function(){
+            return {
+                msg:'这是data里的信息'
             }
-        })
-        let dataObj = { count:0 }
-        Vue.component('counter',{
-            template:'#counter',
-            data:function(){
-                // return dataObj //如果使用这句话，的一下按钮，三个计数器同时计数因为返回的是同一个计数对象
-                return { count:0 } //使用下面这种是因为要每次组件生成标签，data是不同的对象，互不影响
-            },
-            methods:{
-                increment(){
-                    this.count++
-                }
+        }
+    })
+    let dataObj = { count:8 }
+    Vue.component('counter',{
+        template:'#counter',
+        data:function(){
+            // 因为组件是可复用的 Vue 实例，所以它们与 new Vue 接收相同的选项，
+            // 例如 data、computed、watch、methods 以及生命周期钩子等。
+            // 仅有的例外是像 el 这样根实例特有的选项。
+            
+            // return dataObj
+            //如果使用这句的话，按一下按钮，三个计数器同时计数因为data一样，
+            //返回的也是同一个计数对象
+            return { count:8 }
+            //使用下面这种是因为要每次组件生成标签，data是不同的对象，互不影响
+            //因为虽然data一样，但是data每次返回的对象不一样
+        },
+        methods:{
+            increment(){
+                this.count++
             }
-        })
-        // 实例化vue对象
-        let vm = new Vue({
-            // 绑定对象
-            el:'#app',
-            data:{
-            },
-            methods:{
-            }
-        })
-    </script>
+        }
+    })
+    // 实例化vue对象
+    let vm = new Vue({
+        // 绑定对象
+        el:'#app',
+        data:{
+        },
+        methods:{
+        }
+    })
+</script>
 </html>
 ```
 
@@ -283,7 +297,7 @@
 -->
 ```
 
-**使用`:is`属性来切换不同的字组件，并添加切换动画步骤详解**
+**使用`:is`属性来切换不同的子组件，并添加切换动画步骤详解**
 
 组件实例定义方式：
 
@@ -342,6 +356,24 @@ var vm = new Vue({
   }
 </style>
 ```
+
+**`:is`的其他用法**
+
+Vue组件的模板在某些情况下会受到HTML的限制，比如`<table>`内规定只允许是`<tr>`、`<td>`、`<th>`等这些表格元素，所以在`<table>`内直接使用组件时无效的。**这种情况下，可以使用特殊的`is`属性来挂载组件**。
+
+```markup
+<div id="app">
+    <table>
+        <tbody :is="my-component"></tbody>
+    </table>
+</div>
+
+Vue.component('my-component', {
+    template: `<div>这里是组件内容</div>`
+});
+```
+
+常见的限制元素还有`<ul>`、`<ol>`、`<select>`。
 
 ## 父子组件之间的传值
 
@@ -1124,8 +1156,8 @@ var register = Vue.extend({
 ## `watch`、`computed`和`methods`之间的对比
 
 1. `computed`属性的结果会被缓存，除非依赖的响应式属性变化才会重新计算。主要当作属性来使用；
-2. `methods`方法表示一个具体的操作，主要书写业务逻辑；
-3. `watch`一个对象，键是需要观察的表达式，值是对应回调函数。主要用来监听某些特定数据的变化，从而进行某些具体的业务逻辑操作；可以看作是`computed`和`methods`的结合体；
+2. `methods`方法表示一个具体的操作，主要书写业务逻辑（多用）；
+3. `watch`一个对象，键是需要观察的表达式，值是对应回调函数。主要用来监听某些特定数据的变化，从而进行某些具体的业务逻辑操作；可以看作是`computed`和`methods`的结合体（不要滥用）；
 
 ## `nrm`的安装使用
 
