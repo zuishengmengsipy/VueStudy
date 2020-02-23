@@ -146,7 +146,7 @@
 
 ### 组件中展示数据和响应事件
 
-在组件中，`data`需要被定义为一个方法，例如：
+在组件中，**`data`必须被定义为一个方法**，例如：
 
 ```markup
 <html>
@@ -224,7 +224,7 @@
 
 计数器案例，方法每次返回的都是不同的数据对象，计数器之间互不影响，返回对象的话，所有的计数器调用的都是同一个计数对象
 
-## 组件的切换
+## 组件的切换（:is的使用）
 
 ```markup
 <html>
@@ -377,6 +377,37 @@ Vue.component('my-component', {
 
 ## 父子组件之间的传值
 
+> 组件就是可复用的vue实例，子组件是套在new vue里面的组件
+
+1、父组件可以使用 props 把数据传给子组件。  
+2、子组件可以使用 $emit 触发父组件的自定义事件。
+
+**vm.$on\(event,callback\)**
+
+参数： {string \| Array} event \(数组只在 2.2.0+ 中支持\) {Function} callback
+
+用法： 监听当前实例上的自定义事件。事件可以由vm.$emit触发。回调函数会接收所有传入事件触发函数的额外参数。
+
+示例：
+
+```markup
+vm.$on('test', function (msg) {
+ console.log(msg)
+}) 
+ vm.$emit('test', 'hi')
+ // => "hi" 1 2 3 4 5
+```
+
+**vm.$emit\(event,\[args\]\)**
+
+参数： {string} event \[…args\] 触发当前实例上的事件。附加参数都会传给监听器回调。
+
+上面是官方的api，很简洁，粗略一看很容易误解，这里主要是$on的用法，这里回过头去看一下$on的用法，$on是监听当前实例上的自定义事件，这个自定义事件可以由$emit来触发，$on回调函数接收的msg便是$emit方法第二个参数传过来的值。当然你也可以在回调函数里不使用msg参数而执行其他操作。
+
+vm.$emit\( event, arg \) //触发当前实例上的事件
+
+vm.$on\( event, fn \);//监听event事件后运行 fn； 
+
 ### 父向子传值
 
 ```markup
@@ -389,11 +420,13 @@ Vue.component('my-component', {
 </head>
 <body>
 <div id="app">
-    <!-- 父组件，可以在引用子组件的时候，通过属性绑定（v-bind:）的形式, 把需要传递给子组件的数据，以属性绑定的形式，传递到子组件内部，供子组件使用 -->
-    <com1 v-bind:parentmsg="msg"></com1><!-- v-bind绑定后也不能立即使用，需要在子组件的props数组里定义一下 -->
+    <!-- 父组件，可以在引用子组件的时候，通过属性绑定（v-bind:）的形式, 
+    把需要传递给子组件的数据，以属性绑定的形式，传递到子组件内部，供子组件使用 -->
+    <com1 v-bind:parentmsg="msg"></com1>
+    <!-- v-bind绑定后也不能立即使用，需要在子组件的props数组里定义一下 -->
 </div>
 <script>
-    // 创建 Vue 实例，得到 ViewModel
+    // 创建 Vue 实例（父组件），得到 ViewModel
     var vm = new Vue({
         el: '#app',
         data: {
@@ -410,8 +443,10 @@ Vue.component('my-component', {
                 //         content: 'qqq'
                 //     }
                 // },
-                data() { // 注意：子组件中的 data 数据，并不是通过父组件传递过来的，而是子组件自身私有的，比如：子组件通过 Ajax，请求回来的数据，都可以放到 data 身上；
-                    // data 上的数据，都是可读可写的；props中的数据，都是只读的，无法重新赋值
+                data() { 
+// 注意：子组件中的 data 数据，并不是通过父组件传递过来的，而是子组件自身私有的，
+// 比如：子组件通过 Ajax，请求回来的数据，都可以放到 data 身上；
+// data 上的数据，都是可读可写的；props中的数据，都是只读的，无法重新赋值
                     return {
                         title: '123',
                         content: 'qqq'
@@ -420,7 +455,9 @@ Vue.component('my-component', {
                 template: '<h1 @click="change">这是子组件 --- {{ parentmsg }}</h1>',
                 // 注意：组件中的所有props中的数据，都是通过父组件传递给子组件的
                 // props中的数据，都是只读的，无法重新赋值
-                props: ['parentmsg'], // 把父组件传递过来的parentmsg属性，先在props数组定义一下，这样才能使用这个数据
+                props: ['parentmsg'], 
+                // 把父组件传递过来的parentmsg属性，先在props数组定义一下，
+                // 这样才能使用这个数据
                 directives: {},
                 filters: {},
                 components: {},
@@ -433,9 +470,9 @@ Vue.component('my-component', {
 </html>
 ```
 
-### 父向子传递函数和子组件向父组件传值
+### 父向子传递函数然后借此子组件向父组件传值
 
-**父组件向子组件传递方法：**使用的是事件绑定机制；v-on,调用是在子组件里使用$emit进行调用
+**父组件如何向子组件传递函数？：**使用的是事件绑定机制；v-on,调用是在子组件里使用$emit进行调用
 
 **子组件向父组件传值用以下方法实现：**
 
@@ -459,14 +496,16 @@ Vue.component('my-component', {
   <template id="tmpl">
     <div>
       <h1>这是子组件的模板</h1>
-      <input type="button" value="这是子组件中的按钮，点击它，触发父组件传递过来的func方法" @click="myclick">
+      <input type="button"
+       value="这是子组件中的按钮，点击触发父组件传递过来的func方法" @click="myclick">
     </div>
   </template>
 
   <script>
     // 定义了一个字面量类型的组件模板对象
     let com2 = {
-      template: '#tmpl', // 通过指定了一个Id,表示去加载这个指定Id的template元素中的内容，当作组件的HTML结构
+      template: '#tmpl', 
+      // 通过指定了一个Id,表示去加载这个指定Id的template元素中的内容，当作组件的HTML结构
       data() {
         return {
           sonmsg: { name: '小头儿子', age: 6 }
@@ -474,8 +513,8 @@ Vue.component('my-component', {
       },
       methods: {
         myclick() {
-          // 使用emit在子组件调用父组件传来的方法，emit 英文原意是触发，调用、发射的意思
-          // this.$emit('func123', 123, 456)，第一个参数是方法名，后面的参数都是方法的形参
+  // 使用emit在子组件调用父组件传来的方法，emit 英文原意是触发，调用、发射的意思
+  // this.$emit('func123', 123, 456)，第一个参数是方法名，后面的参数都是方法的形参
           this.$emit('func', this.sonmsg)
         }
       }

@@ -712,8 +712,6 @@ weight --- 98 --- 2
 
 ### Vue指令之`v-if`和`v-show`
 
-通过`v-if`和`v-show`的属性值true和false来控制该元素是否显示
-
 > 一般来说，v-if 有更高的切换消耗而 v-show 有更高的初始渲染消耗。因此，如果需要频繁切换 v-show 较好，如果在运行时条件不大可能改变 v-if 较好。
 
 ```markup
