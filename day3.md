@@ -377,10 +377,18 @@ Vue.component('my-component', {
 
 ## 父子组件之间的传值
 
-> 组件就是可复用的vue实例，子组件是套在new vue里面的组件
+> 组件就是可复用的vue实例，子组件是套在new vue里面的组件，子组件中默认无法访问到父组件中的data上的数据（使用props即可）和methods 中的方法（使用$emit）
 
 1、父组件可以使用 props 把数据传给子组件。  
-2、子组件可以使用 $emit 触发父组件的自定义事件。
+2、子组件可以使用 $emit 触发父组件的自定义事件
+
+vm.$emit\( event, arg \) //触发当前实例上的事件
+
+vm.$on\( event, fn \);//监听event事件后运行 fn；
+
+**vm.$emit\(event,\[args\]\)**
+
+参数： {string} event \[…args\] 触发**当前实例（自己组件的vue实例找不到就从父组件上找）**上的事件。附加参数都会传给监听器（**vm.$on**）回调。
 
 **vm.$on\(event,callback\)**
 
@@ -388,25 +396,15 @@ Vue.component('my-component', {
 
 用法： 监听当前实例上的自定义事件。事件可以由vm.$emit触发。回调函数会接收所有传入事件触发函数的额外参数。
 
-示例：
+上面是官方的api，很简洁，粗略一看很容易误解，这里主要是$on的用法，这里回过头去看一下$on的用法，$on是监听当前实例上的自定义事件，这个自定义事件可以由$emit来触发，$on回调函数接收的msg便是$emit方法第二个参数传过来的值。当然你也可以在回调函数里不使用msg参数而执行其他操作。
 
-```markup
+```javascript
 vm.$on('test', function (msg) {
  console.log(msg)
 }) 
- vm.$emit('test', 'hi')
- // => "hi" 1 2 3 4 5
+vm.$emit('test', 'hi')
+// => "hi" 1 2 3 4 5
 ```
-
-**vm.$emit\(event,\[args\]\)**
-
-参数： {string} event \[…args\] 触发当前实例上的事件。附加参数都会传给监听器回调。
-
-上面是官方的api，很简洁，粗略一看很容易误解，这里主要是$on的用法，这里回过头去看一下$on的用法，$on是监听当前实例上的自定义事件，这个自定义事件可以由$emit来触发，$on回调函数接收的msg便是$emit方法第二个参数传过来的值。当然你也可以在回调函数里不使用msg参数而执行其他操作。
-
-vm.$emit\( event, arg \) //触发当前实例上的事件
-
-vm.$on\( event, fn \);//监听event事件后运行 fn； 
 
 ### 父向子传值
 
@@ -420,9 +418,9 @@ vm.$on\( event, fn \);//监听event事件后运行 fn；
 </head>
 <body>
 <div id="app">
-    <!-- 父组件，可以在引用子组件的时候，通过属性绑定（v-bind:）的形式, 
-    把需要传递给子组件的数据，以属性绑定的形式，传递到子组件内部，供子组件使用 -->
-    <com1 v-bind:parentmsg="msg"></com1>
+    <!-- 传入步骤：父组件，引用子组件时，通过属性绑定（v-bind:）的形式, 
+    即把数据以属性绑定的形式，传递到子组件内部，供子组件使用 -->
+    <com1 v-bind:parentmsg="msg"></com1><!--子组件-->
     <!-- v-bind绑定后也不能立即使用，需要在子组件的props数组里定义一下 -->
 </div>
 <script>
@@ -461,7 +459,7 @@ vm.$on\( event, fn \);//监听event事件后运行 fn；
                 directives: {},
                 filters: {},
                 components: {},
-                methods: {change() {this.parentmsg = '被修改了'}}
+                methods: {change() {this.parentmsg = '被修改了'}}//传值
             }
         }
     });
@@ -470,13 +468,13 @@ vm.$on\( event, fn \);//监听event事件后运行 fn；
 </html>
 ```
 
-### 父向子传递函数然后借此子组件向父组件传值
+### 子想父传值：父向子传递函数然后借此函数子组件向父组件传值
 
-**父组件如何向子组件传递函数？：**使用的是事件绑定机制；v-on,调用是在子组件里使用$emit进行调用
+**父组件如何向子组件传递函数？：**使用的是事件绑定机制：v-on,调用是在子组件里使用$emit进行调用
 
 **子组件向父组件传值用以下方法实现：**
 
-* 原理：父组件将方法的引用，传递到子组件内部，子组件在内部调用父组件传递过来的方法，同时把要发送给父组件的数据，在调用方法的时候当作参数传递进去。
+* 原理：父组件将方法的引用传递到子组件内部，子组件在内部调用父组件传递过来的方法，同时把要发送给父组件的数据，在调用方法的时候当作参数传递进去。
 * 父组件将方法的引用传递给子组件，其中，`show`是父组件中`methods`中定义的方法名称，`func`是子组件调用传递过来方法时候的方法名称`<com2 @func="show"></com2>`
 * 子组件内部通过`this.$emit('方法名', 要传递的数据)`方式，来调用父组件中的方法，同时把数据传递给父组件使用
 
@@ -503,7 +501,7 @@ vm.$on\( event, fn \);//监听event事件后运行 fn；
 
   <script>
     // 定义了一个字面量类型的组件模板对象
-    let com2 = {
+    let com2 = { //子组件
       template: '#tmpl', 
       // 通过指定了一个Id,表示去加载这个指定Id的template元素中的内容，当作组件的HTML结构
       data() {
@@ -520,7 +518,7 @@ vm.$on\( event, fn \);//监听event事件后运行 fn；
       }
     }
 
-    let vm = new Vue({
+    let vm = new Vue({ //父组件
       el: '#app',
       data: {
         datamsgFormSon: null  //用于接收子组件传来的数据
@@ -1060,7 +1058,117 @@ var register = Vue.extend({
 </html>
 ```
 
-## `watch`和`computed`监听事件
+## 方法，`computed`计算属性，watch侦听属性
+
+### 引子
+
+模板内的表达式非常便利，但是设计它们的初衷是用于简单运算的。在模板中放入太多的逻辑会让模板过重且难以维护。例如：
+
+```markup
+<div id="example">
+  {{ message.split('').reverse().join('') }}
+</div>
+```
+
+在这个地方，模板不再是简单的声明式逻辑。你必须看一段时间才能意识到，这里是想要显示变量 `message` 的翻转字符串。当你想要在模板中多次引用此处的翻转字符串时，就会更加难以处理。
+
+### **使用函数（方法）：**
+
+经过上面的学习，简化处理该问题能想到把翻转字符串封装到方法里，然后直接调用方法：
+
+```javascript
+<p>Reversed message: "{{ reversedMessage() }}"</p>
+// 在组件中
+methods: {
+  reversedMessage: function () {
+    return this.message.split('').reverse().join('')
+  }
+}
+```
+
+还有一种新的方式能够更简易的实现：叫做计算属性
+
+### **计算属性：**
+
+```javascript
+<div id="example">
+  <p>Original message: "{{ message }}"</p>
+  <p>Computed reversed message: "{{ reversedMessage }}"</p>
+</div>
+
+var vm = new Vue({
+  el: '#example',
+  data: {
+    message: 'Hello'
+  },
+  computed: {
+    // 计算属性的 getter
+    reversedMessage: function () {
+      // `this` 指向 vm 实例
+      return this.message.split('').reverse().join('')
+    }
+  }
+})
+
+结果：
+Original message: "Hello"
+Computed reversed message: "olleH"
+```
+
+这里我们声明了一个计算属性 `reversedMessage`。我们提供的函数将用作属性 `vm.reversedMessage` 的 getter 函数：
+
+```javascript
+console.log(vm.reversedMessage) // => 'olleH'
+vm.message = 'Goodbye'
+console.log(vm.reversedMessage) // => 'eybdooG'
+```
+
+你可以打开浏览器的控制台，自行修改例子中的 vm。`vm.reversedMessage` 的值始终取决于 `vm.message` 的值。
+
+**计算属性的setter**
+
+计算属性默认只有 getter ，不过在需要时你也可以提供一个 setter ：
+
+```javascript
+// ...
+computed: {
+  fullName: {
+    // getter
+    get: function () {
+      return this.firstName + ' ' + this.lastName
+    },
+    // setter
+    set: function (newValue) {
+      var names = newValue.split(' ')
+      this.firstName = names[0]
+      this.lastName = names[names.length - 1]
+    }
+  }
+}
+// ...
+```
+
+现在再运行 `vm.fullName = 'John Doe'` 时，setter 会被调用，`vm.firstName` 和 `vm.lastName` 也会相应地被更新。
+
+### 计算属性缓存 vs 方法：
+
+我们可以通过在表达式中调用方法来达到同样的效果，不同的是**计算属性是基于它们的响应式依赖进行缓存的**。只在相关响应式依赖发生改变时它们才会重新求值。这就意味着只要 `message` 还没有发生改变，多次访问 `reversedMessage` **计算属性会立即返回之前的计算结果，而不必每次都执行函数。**
+
+这也同样意味着下面的计算属性将不再更新，因为 `Date.now()` 不是响应式依赖：
+
+```javascript
+computed: {
+  now: function () {
+    return Date.now()
+  }
+}
+```
+
+相比之下，每当触发重新渲染时，调用方法将**总会**再次执行函数。
+
+我们为什么需要缓存？假设我们有一个性能开销比较大的计算属性 **A**，它需要遍历一个巨大的数组并做大量的计算。然后我们可能有其他的计算属性依赖于 **A** 。如果没有缓存，我们将不可避免的多次执行 **A** 的 getter！如果你不希望有缓存，请用方法来替代。
+
+### watch侦听属性（能用计算属性尽量用计算属性）
 
 考虑一个问题：想要实现 `名` 和 `姓` 两个文本框的内容改变，则全名的文本框中的值也跟着改变；（用以前的知识如何实现？？？）
 
@@ -1103,14 +1211,14 @@ var register = Vue.extend({
             fullname2: '',
             firstname3: '',
             lastname3: '',
-
         },
         methods: {
             getFullname() {
                 this.fullname = this.firstname + '-' + this.lastname
             }
         },
-        // 使用watch可以监视 data 中指定数据的变化，然后触发这个 watch 中对应的function处理函数
+        // 使用watch可以监视 data 中指定数据的变化，
+        // 然后触发这个 watch 中对应的function处理函数
         // 只要指定的自变量改变了，那监听的因变量也会改变
         watch: {
             'firstname2': function (newVal, oldVal) {
@@ -1121,12 +1229,6 @@ var register = Vue.extend({
                 this.fullname2 = this.firstname2 + '-' + newVal
             }
         },
-        // 在 computed 中可以定义一些 属性，这些属性，叫做【计算属性】，
-        // 计算属性的本质是一个方法，只不过，我们在使用这些计算属性的时候，把它们的名称，直接当做属性来使用的；并不会把计算属性当做方法来调用
-        // 注意：
-        // 计算属性，在引用的时候，一定不要加（）去调用，直接把他当做普通属性去使用就好
-        // 只要计算属性内部所用到的 data 发生变化，就会立即从新计算这个属性的值
-        // 计算属性的求值结果，会被缓存，方便下次直接使用，如果计算属性中方法内部的data数据没有发生变化则不重新计算
         computed: {
             'fullname3': function () { //computed计算属性，一定要有return返回值
                 return this.firstname3 + "-" + this.lastname3
@@ -1196,7 +1298,7 @@ var register = Vue.extend({
 
 1. `computed`属性的结果会被缓存，除非依赖的响应式属性变化才会重新计算。主要当作属性来使用；
 2. `methods`方法表示一个具体的操作，主要书写业务逻辑（多用）；
-3. `watch`一个对象，键是需要观察的表达式，值是对应回调函数。主要用来监听某些特定数据的变化，从而进行某些具体的业务逻辑操作；可以看作是`computed`和`methods`的结合体（不要滥用）；
+3. `watch`一个对象，键是需要观察的表达式，值是对应回调函数。主要用来监听某些特定数据的变化，从而进行某些具体的业务逻辑操作； 虽然计算属性在大多数情况下更合适，但有时也需要一个自定义的侦听器。当需要在数据变化时执行异步或开销较大的操作时，这个方式是最有用的。
 
 ## `nrm`的安装使用
 
