@@ -712,6 +712,8 @@ weight --- 98 --- 2
 
 ### Vue指令之`v-if`和`v-show`
 
+通过`v-if`和`v-show`的属性值true和false来控制该元素是否显示
+
 > 一般来说，v-if 有更高的切换消耗而 v-show 有更高的初始渲染消耗。因此，如果需要频繁切换 v-show 较好，如果在运行时条件不大可能改变 v-if 较好。
 
 ```markup
@@ -753,4 +755,248 @@ weight --- 98 --- 2
     </script>
 </html>
 ```
+
+
+
+## 方法，`computed`计算属性，watch侦听属性
+
+### 引子
+
+模板内的表达式非常便利，但是设计它们的初衷是用于简单运算的。在模板中放入太多的逻辑会让模板过重且难以维护。例如：
+
+```markup
+<div id="example">
+  {{ message.split('').reverse().join('') }}
+</div>
+```
+
+在这个地方，模板不再是简单的声明式逻辑。你必须看一段时间才能意识到，这里是想要显示变量 `message` 的翻转字符串。当你想要在模板中多次引用此处的翻转字符串时，就会更加难以处理。
+
+### **使用函数（方法）：**
+
+经过上面的学习，简化处理该问题能想到把翻转字符串封装到方法里，然后直接调用方法：
+
+```javascript
+<p>Reversed message: "{{ reversedMessage() }}"</p>
+// 在组件中
+methods: {
+  reversedMessage: function () {
+    return this.message.split('').reverse().join('')
+  }
+}
+```
+
+还有一种新的方式能够更简易的实现：叫做计算属性
+
+### **计算属性：**
+
+```javascript
+<div id="example">
+  <p>Original message: "{{ message }}"</p>
+  <p>Computed reversed message: "{{ reversedMessage }}"</p>
+</div>
+
+var vm = new Vue({
+  el: '#example',
+  data: {
+    message: 'Hello'
+  },
+  computed: {
+    // 计算属性的 getter
+    reversedMessage: function () {
+      // `this` 指向 vm 实例
+      return this.message.split('').reverse().join('')
+    }
+  }
+})
+
+结果：
+Original message: "Hello"
+Computed reversed message: "olleH"
+```
+
+这里我们声明了一个计算属性 `reversedMessage`。我们提供的函数将用作属性 `vm.reversedMessage` 的 getter 函数：
+
+```javascript
+console.log(vm.reversedMessage) // => 'olleH'
+vm.message = 'Goodbye'
+console.log(vm.reversedMessage) // => 'eybdooG'
+```
+
+你可以打开浏览器的控制台，自行修改例子中的 vm。`vm.reversedMessage` 的值始终取决于 `vm.message` 的值。
+
+**计算属性的setter**
+
+计算属性默认只有 getter ，不过在需要时你也可以提供一个 setter ：
+
+```javascript
+// ...
+computed: {
+  fullName: {
+    // getter
+    get: function () {
+      return this.firstName + ' ' + this.lastName
+    },
+    // setter
+    set: function (newValue) {
+      var names = newValue.split(' ')
+      this.firstName = names[0]
+      this.lastName = names[names.length - 1]
+    }
+  }
+}
+// ...
+```
+
+现在再运行 `vm.fullName = 'John Doe'` 时，setter 会被调用，`vm.firstName` 和 `vm.lastName` 也会相应地被更新。
+
+### 计算属性缓存 vs 方法：
+
+我们可以通过在表达式中调用方法来达到同样的效果，不同的是**计算属性是基于它们的响应式依赖进行缓存的**。只在相关响应式依赖发生改变时它们才会重新求值。这就意味着只要 `message` 还没有发生改变，多次访问 `reversedMessage` **计算属性会立即返回之前的计算结果，而不必每次都执行函数。**
+
+这也同样意味着下面的计算属性将不再更新，因为 `Date.now()` 不是响应式依赖：
+
+```javascript
+computed: {
+  now: function () {
+    return Date.now()
+  }
+}
+```
+
+相比之下，每当触发重新渲染时，调用方法将**总会**再次执行函数。
+
+我们为什么需要缓存？假设我们有一个性能开销比较大的计算属性 **A**，它需要遍历一个巨大的数组并做大量的计算。然后我们可能有其他的计算属性依赖于 **A** 。如果没有缓存，我们将不可避免的多次执行 **A** 的 getter！如果你不希望有缓存，请用方法来替代。
+
+### watch侦听属性（能用计算属性尽量用计算属性）
+
+考虑一个问题：想要实现 `名` 和 `姓` 两个文本框的内容改变，则全名的文本框中的值也跟着改变；（用以前的知识如何实现？？？）
+
+```markup
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8'>
+    <title></title>
+    <script src='https://cdn.jsdelivr.net/npm/vue/dist/vue.js'></script>
+</head>
+<body>
+<div id='app'>
+    <!-- 分析 1、监听到文本框的改变-->
+    <h2>第一种，键盘事件监听，配合getFullname改变fullname</h2>
+    <input type="text" v-model="firstname" @keyup="getFullname"> +
+    <input type="text" v-model="lastname" @keyup="getFullname"> =
+    <input type="text" v-model="fullname">
+    <h2>第二种，使用watch监听</h2>
+    <input type="text" v-model="firstname2"> +
+    <input type="text" v-model="lastname2"> =
+    <input type="text" v-model="fullname2">
+    <h2>第三个，使用computed计算属性</h2>
+    <input type="text" v-model="firstname3"> +
+    <input type="text" v-model="lastname3"> =
+    <input type="text" v-model="fullname3">
+</div>
+</body>
+<script>
+    // 实例化vue对象
+    let vm = new Vue({
+        // 绑定对象
+        el: '#app',
+        data: {
+            firstname: '',
+            lastname: '',
+            fullname: '',
+            firstname2: '',
+            lastname2: '',
+            fullname2: '',
+            firstname3: '',
+            lastname3: '',
+        },
+        methods: {
+            getFullname() {
+                this.fullname = this.firstname + '-' + this.lastname
+            }
+        },
+        // 使用watch可以监视 data 中指定数据的变化，
+        // 然后触发这个 watch 中对应的function处理函数
+        // 只要指定的自变量改变了，那监听的因变量也会改变
+        watch: {
+            'firstname2': function (newVal, oldVal) {
+                console.log("new:" + newVal + "--old:" + oldVal)
+                this.fullname2 = this.firstname2 + '-' + this.lastname2
+            },
+            'lastname2': function (newVal) {
+                this.fullname2 = this.firstname2 + '-' + newVal
+            }
+        },
+        computed: {
+            'fullname3': function () { //computed计算属性，一定要有return返回值
+                return this.firstname3 + "-" + this.lastname3
+            },
+        }
+    })
+</script>
+</html>
+```
+
+###  **watch-监听路由地址的改变**
+
+```markup
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8'><title></title>
+    <script src='https://cdn.jsdelivr.net/npm/vue/dist/vue.js'></script>
+    <script src="https://unpkg.com/vue-router/dist/vue-router.js"></script>
+</head>
+<body>
+<div id='app'>
+    <router-link to="/login">登录</router-link>
+    <router-link to="/register">注册</router-link>
+    <router-view></router-view>
+</div>
+</body>
+<script>
+    // 创建组件模板对象
+    let login = {
+        template: "<h1>登录组件</h1>",
+
+    }
+    let register = {
+        template: "<h1>注册组件</h1>",
+    }
+    let router = new VueRouter({
+        routes: [
+            {path: '/', redirect: 'login'},
+            {path: '/login', component: login},
+            {path: '/register', component: register}
+        ]
+    })
+    // 实例化vue对象
+    let vm = new Vue({
+        // 绑定对象
+        el: '#app',
+        data: {},
+        methods: {},
+        router,
+        watch: {
+            "$route.path": function (newVal, oldVal) {
+                console.log("new:" + newVal + "--old:" + oldVal)
+                if (newVal == "/login") {
+                    console.log("欢迎进入登录页面")
+                } else if (newVal == "/register") {
+                    console.log("欢迎进入注册页面")
+                }
+            }
+        }
+    })
+</script>
+</html>
+```
+
+## `watch`、`computed`和`methods`之间的对比
+
+1. `computed`属性的结果会被缓存，除非依赖的响应式属性变化才会重新计算。主要当作属性来使用；
+2. `methods`方法表示一个具体的操作，主要书写业务逻辑（多用）；
+3. `watch`一个对象，键是需要观察的表达式，值是对应回调函数。主要用来监听某些特定数据的变化，从而进行某些具体的业务逻辑操作； 虽然计算属性在大多数情况下更合适，但有时也需要一个自定义的侦听器。当需要在数据变化时执行异步或开销较大的操作时，这个方式是最有用的。
 
