@@ -21,8 +21,9 @@
 
 ```markup
 <!-- 2. 使用 router-link 组件来导航 -->
-<router-link to="/login">登录</router-link><!--相当于创建一个a标签，点击跳转到#/-->
-<router-link to="/register">注册</router-link>
+<router-link to="/login">登录</router-link><!--默认相当于创建一个a标签，点击跳转到#/-->
+<router-link to="/register" tag="span">注册</router-link>
+<!-- tag属性相当于将默认创建的a标签切换成自定义标签 -->
 ```
 
 * 使用 router-view 组件来显示匹配到的组件
@@ -113,7 +114,8 @@
 
 
     <transition mode="out-in"><!-- 设置切换动画 -->
-    <!-- 这是 vue-router 提供的元素，专门用来当作占位符的，按路由规则匹配到的组件，就会展示到这个router-view中去 -->
+    <!-- 这是 vue-router 提供的元素，专门用来当作占位符的，
+    按路由规则匹配到的组件，就会展示到这个router-view中去 -->
       <router-view></router-view><!-- 所以：我们可以把 router-view 认为是一个占位符 -->
     </transition>
   </div>
@@ -132,28 +134,32 @@
        template: '<h1>登录组件</h1>'
      }) */
 
-    // 2. 创建一个路由对象，导入vue-router包之后，在window全局对象中，就有了一个路由的构造函数，叫做VueRouter
+    // 2. 创建一个路由对象，导入vue-router包之后，在window全局对象中，
+    // 就有了一个路由的构造函数，叫做VueRouter
     // 在 new 路由对象的时候，可以为 构造函数，传递一个配置对象
     let routerObj = new VueRouter({
       // route // 这个配置对象中的 route 表示 【路由匹配规则】 的意思
       routes: [ // 路由匹配规则 
-        // 每个路由规则，都是一个对象，这个规则对象，身上，有两个必须的属性：
-        //  属性1 是 path， 表示监听 哪个路由链接地址；
-        //  属性2 是 component， 表示，如果 路由是前面匹配到的 path ，则展示 component 属性对应的那个组件
+// 每个路由规则，都是一个对象，这个规则对象，身上，有两个必须的属性：
+//  属性1 是 path， 表示监听 哪个路由链接地址；
+//  属性2 是 component，表示如果路由是前面匹配到的path,则展示 component 属性对应的那个组件
         // 注意： component 的属性值，必须是一个 组件的模板对象， 不能是 组件的引用名称；
         // { path: '/', component: login },
-        { path: '/', redirect: '/login' }, // 这里的 redirect 和 Node 中的 redirect 完全是两码事
+        { path: '/', redirect: '/login' }, 
+        // 这里的 redirect 和 Node 中的 redirect 完全是两码事
         { path: '/login', component: login },
         { path: '/register', component: register }
       ],
-      linkActiveClass: 'myactive'  //这个属性是定义链接生效的默认类，默认是router-link-active
+      linkActiveClass: 'myactive'  
+      //这个属性是定义链接生效的默认类，默认是router-link-active
     })
 
     let vm = new Vue({
       el: '#app',
       data: {},
       methods: {},
-      router: routerObj // 将路由规则对象，注册到vm实例上，用来监听URL地址的变化，然后展示对应的组件
+      router: routerObj 
+      // 将路由规则对象，注册到vm实例上，用来监听URL地址的变化，然后展示对应的组件
     });
   </script>
 </body>
@@ -277,7 +283,8 @@ var register = Vue.extend({
           path: '/account',
           component: account,
           children: [ // 通过 children 数组属性，来实现路由的嵌套
-            { path: 'login', component: login }, // 注意，子路由的开头位置，不要加 / 路径符
+            { path: 'login', component: login },
+             // 注意，子路由的开头位置，不要加 / 路径符
             { path: 'register', component: register }
           ]
         }
