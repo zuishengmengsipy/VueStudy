@@ -483,6 +483,18 @@ Vue.elementDirective('red-color', {
   * 销毁期间的生命周期函数：
     * beforeDestroy：实例销毁之前调用。在这一步，实例仍然完全可用。
     * destroyed：Vue 实例销毁后调用。调用后，Vue 实例指示的所有东西都会解绑定，所有的事件监听器会被移除，所有的子实例也会被销毁。
+* ready 加载时机： 在编译结束和第一次插入文档之后调用，如在第一次钩子之后调用。注意必须是由插入（如appendTo\(\) 等方法或指令更新）才触发 ready 钩子。
+
+```text
+new Vue({
+    el:'#app',
+    data: data,
+    ready: function(){
+        Vue.set(data,'sex', '男');
+        this.$set('info.'+key, 'what is this?');
+    }
+});
+```
 
 ## [vue-resource 实现 get, post, jsonp请求](https://github.com/pagekit/vue-resource)
 

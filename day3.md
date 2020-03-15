@@ -540,6 +540,10 @@ vm.$emit('test', 'hi')
 </html>
 ```
 
+### 非父子组件通信
+
+
+
 ### 评论列表案例
 
 目标：主要练习父子组件之间传值
@@ -669,8 +673,6 @@ props: {
 
 {% embed url="https://segmentfault.com/a/1190000015199363" %}
 
-
-
 ## 使用 `this.$refs` 来获取元素和组件（获取DOM）
 
 第一步：给标签元素加ref属性
@@ -715,4 +717,83 @@ props: {
     });
   </script>
 ```
+
+## Vue.$set解决视图信息不能及时变化的情况
+
+这里定义了一个列表数据，通过三个不同的按钮来控制列表数据。  
+调用方法：Vue.set\( target, key, value \)  
+     target：要更改的数据源\(可以是对象或者数组\)  
+     key：要更改的具体数据（数组下标）  
+     value ：重新赋的值
+
+```markup
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+<body>
+<div id="app2">
+    <p v-for="item in items" :key="item.id">
+        {{item.message}}
+    </p>
+    <button class="btn" @click="btn2Click()">动态赋值</button><br/>    
+    <button class="btn" @click="btn3Click()">为data新增属性</button>
+</div>
+<script src="../../dist/vue.min.js"></script>
+<script>
+var vm2=new Vue({
+    el:"#app2",
+    data:{
+        items:[
+            {message:"Test one",id:"1"},
+            {message:"Test two",id:"2"},
+            {message:"Test three",id:"3"}
+        ]
+    },
+    methods:{
+        btn2Click:function(){//解决修改问题
+            Vue.set(this.items,0,{message:"Change Test",id:'10'})
+            //需要更改项，下标，修改值
+        },
+        btn3Click:function(){//添加
+            var itemLen=this.items.length;
+            Vue.set(this.items,itemLen,{message:"Test add attr",id:itemLen});
+        }
+    }
+});
+</script>
+</body>
+</html>
+```
+
+此时页面是这样![](//upload-images.jianshu.io/upload_images/16300678-6cce499618f4ab59.png?imageMogr2/auto-orient/strip|imageView2/2/w/171/format/webp)
+
+点击第一个按钮后运行methods中的btn2Clcick方法，将Test one更改为Change Test  
+![](//upload-images.jianshu.io/upload_images/16300678-31418e431ee67019.png?imageMogr2/auto-orient/strip|imageView2/2/w/674/format/webp)  
+ 运行后的结果：此时列表中第一列的Test one已经变成了Change Test  
+![](//upload-images.jianshu.io/upload_images/16300678-31d54a9ba042f6ab.png?imageMogr2/auto-orient/strip|imageView2/2/w/170/format/webp)
+
+这里警惕一种情况： 当写惯了JS之后，有可能我会想改数组中某个下标的中的数据我直接this.items\[XX\]就改了，如：
+
+```javascript
+btn2Click:function(){
+  this.items[0]={message:"Change Test",id:'10'}
+}
+```
+
+我们来看看结果：![](//upload-images.jianshu.io/upload_images/16300678-5669dc2f032a1101.png?imageMogr2/auto-orient/strip|imageView2/2/w/649/format/webp)
+
+这种情况，是Vue文档中明确指出的注意事项，由于 JavaScript 的限制，Vue 不能检测出数据的改变，所以当我们需要动态改变数据的时候，Vue.set\(\)完全可以满足我们的需求。
+
+仔细看的同学会问了，这不是还有一个按钮吗，有什么用？
+
+我们还是直接看：![](//upload-images.jianshu.io/upload_images/16300678-ca543b889ff4d1a3.png?imageMogr2/auto-orient/strip|imageView2/2/w/556/format/webp)  
+
+
+这是初始的列表数据，数据里面有三个对象  
+ 点击之后：![](//upload-images.jianshu.io/upload_images/16300678-54498bed8c453e91.png?imageMogr2/auto-orient/strip|imageView2/2/w/601/format/webp)  
+ 这里可以看出，Vue.set\(\)不光能修改数据，还能添加数据，弥补了Vue数组变异方法的不足  
+链接：https://www.jianshu.com/p/e6e8c45e7fd6
 
