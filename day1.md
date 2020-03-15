@@ -267,6 +267,74 @@
 </html>
 ```
 
+### 指令修饰符：.lazy .number .trim
+
+在输入框中，v-model 默认是同步数据，使用 .lazy 会转变为在 change 事件中同步 ， 也就是在失去焦点 或者 按下回车键时才更新
+
+```markup
+<template>
+    <div>
+        <p>.lazy修饰符</p>
+        <input type="text" v-model.lazy="val">
+        <p>{{ val }}</p>
+    </div>
+</template>
+<script>
+    export default {
+        data(){
+            return{
+              val:''
+            }
+        }
+    }
+</script>
+```
+
+.number 修饰符可以将 输入的值转化为Number类型 ，否则虽然你输入的是数字 但它的类型其实是String，在数字输入框中比较有用
+
+```markup
+<template>
+    <div>
+        <p>.number修饰符</p>
+        <input type="number" v-model.number="val">
+        <p>我的数据类型是：{{ typeof(val) }}</p>
+    </div>
+</template>
+
+<script>
+    export default {
+        data(){
+            return{
+              val:''
+            }
+        }
+    }
+</script>
+```
+
+.trim 修饰符会自动过滤掉输入的首尾空格
+
+```markup
+<template>
+    <div>
+        <p>.trim修饰符</p>
+        <input type="etxt" v-model.trim="val">
+        <p>val的长度是：{{ val.length }}</p>
+    </div>
+</template>
+
+<script>
+    export default {
+        data(){
+            return{
+              val:''
+            }
+        }
+    }
+</script>
+原文链接：https://blog.csdn.net/qq_36407748/article/details/80149072
+```
+
 ### 事件修饰符：
 
 * .stop 阻止冒泡
@@ -347,6 +415,8 @@
     </script>
 </html>
 ```
+
+![](.gitbook/assets/1205975-20180802141042140-162137009.png)
 
 ### Vue指令之`v-model`和`双向数据绑定`
 
@@ -755,8 +825,6 @@ weight --- 98 --- 2
     </script>
 </html>
 ```
-
-
 
 ## 方法，`computed`计算属性，watch侦听属性
 

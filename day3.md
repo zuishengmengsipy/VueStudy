@@ -671,7 +671,11 @@ props: {
 
 
 
-## 使用 `this.$refs` 来获取元素和组件
+## 使用 `this.$refs` 来获取元素和组件（获取DOM）
+
+第一步：给标签元素加ref属性
+
+第二步：用this.$refs.属性值来获取
 
 ```markup
   <div id="app">

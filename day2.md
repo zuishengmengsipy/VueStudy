@@ -419,7 +419,9 @@ Vue.directive('focus', {
 })
 Vue.directive('color', {
     bind: function (el, binding) {
-    //第一个参数表示被绑定的那个元素，第二个参数为V-color=“xxx”的xxxx
+    //第一个参数表示被绑定的标签元素，第二个参数为指令绑定的所有信息组成的对象
+    //binding.value指令绑定的数据的值，比如V-color=“xxx”的xxxx
+    //binding.modifires指令的修饰符，比如V-color.lazy的.lazy
         console.log(binding)
         el.style.color = binding.value
     },  //每当指令绑定到元素上的时候，会立刻执行这个 bind 函数，只会执行一次
