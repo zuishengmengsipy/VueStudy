@@ -1,4 +1,4 @@
-# day3
+# vue组件
 
 ## 定义Vue组件
 
@@ -388,7 +388,7 @@ vm.$on\( event, fn \);//监听event事件后运行 fn；
 
 **vm.$emit\(event,\[args\]\)**
 
-参数： {string} event \[…args\] 触发**当前实例（自己组件的vue实例找不到就从父组件上找）**上的事件。附加参数都会传给监听器（**vm.$on**）回调。
+参数： {string} event \[…args\] 触发**当前实例（自己组件的vue实例找不到就从父组件上找，都找不到则创建该事件）**上的事件。附加参数都会传给监听器（**vm.$on**）回调。
 
 **vm.$on\(event,callback\)**
 
@@ -401,9 +401,11 @@ vm.$on\( event, fn \);//监听event事件后运行 fn；
 ```javascript
 vm.$on('test', function (msg) {
  console.log(msg)
+ this.talk = msg 
+//注意这里的this，因为this在function里，所以谁触发了function，this就是谁，这里是vm触发了function
 }) 
 vm.$emit('test', 'hi')
-// => "hi" 1 2 3 4 5
+// => "hi"
 ```
 
 ### 父向子传值
@@ -414,14 +416,17 @@ vm.$emit('test', 'hi')
 <head>
     <meta charset="UTF-8">
     <title>Document</title>
-    <script src="./lib/vue.js"></script>
+    <script src='https://cdn.jsdelivr.net/npm/vue/dist/vue.js'></script>
 </head>
 <body>
 <div id="app">
-    <!-- 传入步骤：父组件，引用子组件时，通过属性绑定（v-bind:）的形式, 
+    <!-- 传入步骤：父组件，引用子组件时，通过属性绑定（v-bind:）的形式,
     即把数据以属性绑定的形式，传递到子组件内部，供子组件使用 -->
+    <input type="text" v-model="msg">
     <com1 v-bind:parentmsg="msg"></com1><!--子组件-->
     <!-- v-bind绑定后也不能立即使用，需要在子组件的props数组里定义一下 -->
+    <!--这里用v-model绑定了父级的数据msg，当通过输入框任意输入时-->
+    <!--子组件接收到的props["parentmsg"]也会实时响应，并更新组件模板。-->
 </div>
 <script>
     // 创建 Vue 实例（父组件），得到 ViewModel
@@ -441,19 +446,20 @@ vm.$emit('test', 'hi')
                 //         content: 'qqq'
                 //     }
                 // },
-                data() { 
+                data() {
 // 注意：子组件中的 data 数据，并不是通过父组件传递过来的，而是子组件自身私有的，
 // 比如：子组件通过 Ajax，请求回来的数据，都可以放到 data 身上；
 // data 上的数据，都是可读可写的；props中的数据，都是只读的，无法重新赋值
                     return {
                         title: '123',
-                        content: 'qqq'
+                        content: 'qqq',
+                        m:this.parentmsg
                     }
                 },
-                template: '<h1 @click="change">这是子组件 --- {{ parentmsg }}</h1>',
+                template: '<h1 @click="change">这是子组件 --- {{ parentmsg }}--，这是子组件的m--{{m}}--</h1>',
                 // 注意：组件中的所有props中的数据，都是通过父组件传递给子组件的
                 // props中的数据，都是只读的，无法重新赋值
-                props: ['parentmsg'], 
+                props: ['parentmsg'],
                 // 把父组件传递过来的parentmsg属性，先在props数组定义一下，
                 // 这样才能使用这个数据
                 directives: {},
@@ -488,7 +494,7 @@ vm.$emit('test', 'hi')
 </head>
 <body>
   <div id="app">
-    <!-- 父组件向子组件传递方法，使用的是事件绑定机制；v-on -->
+    <!-- 父组件向子组件传递函数，使用的是事件绑定机制；v-on -->
     <com2 @func="show"></com2><!-- 调用是在子组件里使用$emit进行调用 -->
   </div>
   <template id="tmpl">
@@ -542,7 +548,75 @@ vm.$emit('test', 'hi')
 
 ### 非父子组件通信
 
+{% embed url="https://www.cnblogs.com/jin-zhe/p/9291071.html" %}
 
+非父子组件的传值，vue官网指出，可以使用一个空vue实例作为事件中央线！
+
+```markup
+<html>
+<head>
+  <meta charset='utf-8'>
+  <title></title>
+  <script src='https://cdn.jsdelivr.net/npm/vue/dist/vue.js'></script>
+</head>
+<body>
+<div id='app'>
+<sister></sister>
+<brother></brother>
+</div>
+</body>
+<script>
+  let me = new Vue(); //中间联系人,空的就行
+  let sister = {
+    template:`<div>
+              <h1>这是姐姐组件</h1>
+              <button @click="my_click">点击后通过我给哥哥留言</button>
+              </div>`,
+    methods: {
+      my_click(){
+        //点击通过我给哥哥留言
+        me.$emit("call", "今晚等我") // 通过中间联系人进行联系
+      }
+    }
+  }
+
+  let brother = {
+    template:`
+<div>
+<h1>这是哥哥组件</h1>
+<p>姐姐告诉你：{{say}}</p>
+</div>`,
+    data(){
+      return{
+        say:""
+      }
+    },
+    mounted(){//组件加载完成后执行的方法
+      let that = this;//添加that定义使之成为brother，原因见下
+      me.$on("call", function (data) {
+        // console.log(data)
+        // this.say = data//不能使用this这里的this是me，这里需要是brother
+        that.say = data//添加that定义使之成为brother
+      })
+    }
+  }
+  // 实例化vue对象
+  let vm = new Vue({
+    // 绑定对象
+    el: '#app',
+    components:{
+      sister:sister,
+      brother:brother
+    },
+    methods: {
+      show(data){
+        console.log("dsfds")
+      },
+    }
+  })
+</script>
+</html>
+```
 
 ### 评论列表案例
 
@@ -645,7 +719,7 @@ vm.$emit('test', 'hi')
 
 ### Prop 类型 <a id="Prop-&#x7C7B;&#x578B;"></a>
 
-到这里，我们只看到了以字符串数组形式列出的 prop：
+父组件可以使用 props 把数据传给子组件，到这里我们只看到了以字符串数组形式列出的 prop：
 
 ```text
 props: ['title', 'likes', 'isPublished', 'commentIds', 'author']
@@ -667,11 +741,376 @@ props: {
 
 这不仅为你的组件提供了文档，还会在它们遇到错误的类型时从浏览器的 JavaScript 控制台提示用户。你会在这个页面接下来的部分看到[类型检查和其它 prop 验证](https://cn.vuejs.org/v2/guide/components-props.html#Prop-%E9%AA%8C%E8%AF%81)。
 
+`props`中声明的数据与组件`data`函数中`return`的数据主要区别就是`props`的数据来自父级，而`data`中的是组件自己的数据，作用域是组件本身，这两种数据都可以在模板`template`及计算属性`computed`和方法`methods`中使用。
+
+
+
 进阶
 
 {% embed url="https://blog.csdn.net/howgod/article/details/90695332" %}
 
 {% embed url="https://segmentfault.com/a/1190000015199363" %}
+
+## 混合
+
+对于组件的重复功能和数据的储存器，可以使用Mixins的来引用重复代码，对于项目来说，一个组件一个文件，混合的作用较小
+
+```javascript
+<html>
+<head>
+    <meta charset='utf-8'>
+    <title></title>
+    <script src='https://cdn.jsdelivr.net/npm/vue/dist/vue.js'></script>
+</head>
+<body>
+<div id="app">
+    <PopUp></PopUp>
+    <ToolTip></ToolTip>
+</div>
+</body>
+<!--点击显示和隐藏  提示框的显示和隐藏-->
+<!--html 代码-->
+<script>
+    let base = {
+        data: function () {
+            return {
+                visible: true,
+            }
+        },
+        methods: {
+            show: function () {
+                this.visible = true
+            },
+            hide: function () {
+                this.visible = false
+            }
+        }
+    }
+
+    Vue.component('popup', {
+        template:`
+            <div>
+            <button @click="show">PopUp show</button>
+            <button @click="hide">PopUp hide</button>
+            <div v-if="visible"><p>hello everybody</p></div>
+            </div>
+        `,
+        // data: function () {
+        //     return {
+        //         visible: true, //默认是显示的
+        //     }
+        // },
+        mixins: [base]
+    });
+    Vue.component('tooltip', {
+        template: `
+            <div>
+            <div @mouseenter="show" @mouseleave="hide">显示隐藏</div>
+            <div v-if="visible"><p>鼠标移入显示，移出隐藏</p></div>
+            </div>
+        `,
+        mixins: [base]
+    });
+
+    new Vue({
+        el: "#app",
+    })
+</script>
+</html>
+```
+
+## 插槽
+
+为组件做内容分发的，使用相同的组件，替换其中的一部分内容，而且没有slot标签，组件里面写任何东邪都无法显示
+
+```markup
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.10/dist/vue.js"></script>
+</head>
+<body>
+<div id="ret">
+    <coma>
+        <h2 slot="title">大头儿子</h2>
+        <h4 slot="article">头很大</h4>
+    </coma>
+    <coma>
+        <h2 slot="title">小头爸爸</h2>
+        <div slot="article">头很小</div>
+        <!--dsafdsafdsafs-->
+        <!--<p>A paragraph for the main content.</p>-->
+        <!--<p>And another one.</p>-->
+    </coma>
+    <coma><!--vue2.6以上支持v-slot具名插槽，且标签只能用template，效果一样-->
+        <template v-slot:title><h2>大头儿子</h2></template>
+        <template v-slot:article>头很大</template>
+        <!--dsafdsafdsafs-->
+        <!--<p>A paragraph for the main content.</p>-->
+        <!--<p>And another one.</p>-->
+        <!--<div v-slot:article>头很大</div>  标签只能是template，别的不行-->
+    </coma>
+</div>
+<script>
+    let coma = {
+        template:`<div>
+                    <h1>这是一个组件</h1>
+                    <slot name="title"></slot>
+                    <slot name="article"></slot>
+                    <!--<slot></slot>-->
+                    没有名字的叫默认插槽，coma的注释两行解注释也无法显示 
+                    </div> `,
+    };
+    const ret = new Vue({
+        el:"#ret",
+        components: {
+            coma:coma
+        }
+    })
+</script>
+</body>
+</html>
+```
+
+### 具名插槽（接上例代码）
+
+```markup
+<coma><!--vue2.6以上支持v-slot具名插槽，且标签只能用template，效果一样-->
+    <template v-slot:title><h2>大头儿子</h2></template>
+    <template v-slot:article>头很大</template>
+    <!--dsafdsafdsafs-->
+    <!--<p>A paragraph for the main content.</p>-->
+    <!--<p>And another one.</p>-->
+    <!--<div v-slot:article>头很大</div>  标签只能是template，别的不行-->
+</coma>
+```
+
+ 就是这么简单，插槽的名字现在通过 `v-slot:slotName` 这种形式来使用。 `v-slot` 只能添加到 `<template>` 或自定义组件上，这点与弃用的 slot 属性不同
+
+ **Tips: 没有名字的 `<slot>` 隐含有一个 `"default"` 名称**
+
+例如，上面的**被注释的默认插槽**，如果你想显示调用的话，可以这样：
+
+```markup
+  <template v-slot:default>
+    dsafdsafdsafs
+    <p>A paragraph for the main content.</p>
+    <p>And another one.</p>
+  </template>
+```
+
+### 作用域插槽
+
+有时候，我们想在父组件中访问子组件内部的一些可用数据。例如，假设有一个下面**模板（template）的 `<current-user>` 组件**：
+
+```text
+template:`<span>
+        <slot>{{ user.lastName }}</slot>
+        </span>`
+```
+
+我们可能想用用户的名字来替换掉插槽里面的姓，于是我们这样写：
+
+```text
+<current-user>
+  {{ user.firstName }}
+</current-user>
+```
+
+很不幸，上面这段代码不能如你预期那样工作，因为当前代码的作用域环境是在父组件中，所以它访问不了 `<current-user>` 内部的数据。
+
+为了解决这个， 我们可以在 `<current-user>` 内部的 `<slot>` 元素上动态绑定一个 `user` 对象属性：
+
+```text
+<span>
+  <!-- 完整 v-bind:user 下面是简写形式 -->
+  <slot :user="user">
+    {{ user.lastName }}
+  </slot>
+</span>
+```
+
+绑定到 `<slot>` 元素上的属性我们称之为 **slot props**。现在，在父作用域中，我们可以通过 `slot-scope` 来访问 `user` 数据了：
+
+```text
+<current-user>
+  <template slot-scope="slotProp">
+    {{ slotProp.user.firstName }}
+  </template>
+</current-user>
+```
+
+同样的，我们使用 `v-slot` 重构上面的代码：
+
+```text
+<current-user>
+  <template v-slot:default="slotProps">
+    {{ slotProps.user.firstName }}
+  </template>
+</current-user>
+```
+
+或者直接作用在 `<current-user>` 上的写法：
+
+```text
+<!-- 省略默认插槽名字 -->
+<current-user v-slot="slotProp">
+  {{ slotProp.user.firstName }}
+</current-user>
+
+<!-- 显示调用默认插槽名字 -->
+<current-user v-slot:default="slotProp">
+  {{ slotProp.user.firstName }}
+</current-user>
+```
+
+> 在这个栗子中，我们选择 `slotProp` 作为我们的 **slot props** 名字，但你可以使用你喜欢的任何名字。
+
+### 单个默认插槽的缩写形式
+
+在上述情况下，当且仅当提供了默认插槽内容时，我们可以使用 `v-slot` 直接作用在组件上：
+
+```text
+<current-user v-slot:default="slotProps">
+  {{ slotProps.user.firstName }}
+</current-user>
+```
+
+我们可以简化上面的的默认插槽写法：
+
+```text
+<current-user v-slot="slotProps">
+  {{ slotProps.user.firstName }}
+</current-user>
+```
+
+请注意了，默认插槽的缩写语法不能与具名插槽混用：
+
+```text
+<!-- 控制台将报警告：-->
+<!-- To avoid scope ambiguity, the default slot should also use <template> syntax when there are other named slots. -->
+<!-- 意思就是说，为了避免作用域模糊 -->
+<!-- 当有其他具名插槽时，默认插槽也应当使用 '<template>' 模板语法 -->
+<current-user v-slot="slotProps">
+  {{ slotProps.user.firstName }}
+  <template v-slot:other="otherSlotProps">
+    slotProps is NOT available here
+  </template>
+</current-user>
+```
+
+于是，上面的代码，我们改写成：
+
+```text
+<current-user>
+ <!-- 两种写法均可 -->
+  <!--<template v-slot="slotProps">
+    {{ slotProps.user.firstName }}
+  </template>-->
+  <template v-slot:default="slotProps">
+    {{ slotProps.user.firstName }}
+  </template>
+
+  <template v-slot:other="otherSlotProps">
+    ...
+  </template>
+</current-user>
+```
+
+### 插槽内容的解构赋值
+
+在 Vue 代码内部，我们传递的 slotProps 其实就是函数的一个单一参数：
+
+```text
+function (slotProps) {
+  // ... slot content ...
+}
+```
+
+这也就意味着 `v-slot` 的值只要满足函数参数定义的 JavaScript 表达式的都可以接受。因此，在支持的环境（单文件或现代浏览器）中，你还可以使用 **ES2015** 解构语法来提取特定的插值内容，例如：
+
+```text
+<current-user v-slot="{ user }">
+  {{ user.firstName }}
+</current-user>
+```
+
+代码看起来更简洁对吧。我们还可以重命名解构变量：
+
+```text
+<current-user v-slot="{ user: person }">>
+  {{ person.firstName }}
+</current-user>
+```
+
+这给了我们很多自由操作的空间，你甚至可以自定义回退内容，以便在未定义插值情况下使用：
+
+```text
+<current-user v-slot="{ user = { firstName: 'Guest' } }">>
+  {{ user.firstName }}
+</current-user>
+```
+
+### 动态插槽名称
+
+> 2.6.0+ 新增
+
+[动态指令参数](https://link.juejin.im/?target=https%3A%2F%2Fvuejs.org%2Fv2%2Fguide%2Fsyntax.html%23Dynamic-Arguments) 也适用于 `v-slot` ，允许我们定义动态插槽名称：
+
+```text
+<base-layout>
+  <template v-slot:[dynamicSlotName]>
+    ...
+  </template>
+</base-layout>
+复制代码
+```
+
+### 命名插槽简写
+
+> 2.6.0+ 新增
+
+与 `v-on` 和 `v-bind` 类似，`v-slot` 也有一个简写，即使用 `#` 代替 `v-slot`。例如， `v-slot:header` 简写成 `#header`:
+
+```text
+<base-layout>
+  <template #header>
+    <h1>Here might be a page title</h1>
+  </template>
+
+  <p>A paragraph for the main content.</p>
+  <p>And another one.</p>
+
+  <template #footer>
+    <p>Here's some contact info</p>
+  </template>
+</base-layout>
+复制代码
+```
+
+和其他指令一样，只有在提供参数时才能使用简写形式，下面的写法是无效的：
+
+```text
+<!-- 将会触发一个控制台警告 -->
+<current-user #="{ user }">
+  {{ user.firstName }}
+</current-user>
+复制代码
+```
+
+也就是说，如果你想使用简写语法，则务必指定插值的名字：
+
+```text
+<current-user #default="{ user }">
+  {{ user.firstName }}
+</current-user>
+```
+
+链接：[https://juejin.im/post/5c64e11151882562e4726d98](https://juejin.im/post/5c64e11151882562e4726d98)
+
+[https://blog.csdn.net/weixin\_34357436/article/details/91435871](https://blog.csdn.net/weixin_34357436/article/details/91435871)
 
 ## 使用 `this.$refs` 来获取元素和组件（获取DOM）
 
