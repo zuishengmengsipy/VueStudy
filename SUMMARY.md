@@ -5,4 +5,5 @@
 * [day2](day2.md)
 * [vue组件](vue-zu-jian.md)
 * [vue 路由系统](vue-lu-you-xi-tong.md)
+* [element](element.md)
 
