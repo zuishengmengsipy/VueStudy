@@ -6,4 +6,5 @@
 * [vue组件](vue-zu-jian.md)
 * [vue 路由系统](vue-lu-you-xi-tong.md)
 * [element](element.md)
+* [vue-cli](vue-cli.md)
 
