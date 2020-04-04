@@ -106,6 +106,8 @@ npm run dev
 
 ### 整个项目目录结构：
 
+build中配置了webpack的基本配置、开发环境配置、生产环境配置等
+
 ![](.gitbook/assets/916533-20180118181001443-1283702699.png)
 
 ### build文件夹下相关文件及目录：
@@ -118,19 +120,19 @@ npm run dev
 
 ### vue-cli项目中页面相关的主要文件^o^
 
-首先是index.html:
+**index.html（首页，项目入口）:**
 
-说明：一般只定义一个空的根节点，在main.js里面定义的实例将挂载在\#app节点下，内容通过vue组件填充。
+说明：一般只定义一个空的根节点（id="app"），在main.js里面定义的实例将挂载在\#app节点下，**内容通过vue组件填充，&lt;div id="app"&gt;&lt;/div&gt;里面不要写东西，因为页面会瞬间显示index.html中div里的东西，然后vue根实例会挂载到该挂载点上**。
 
 ![](.gitbook/assets/image.png)
 
-App.vue文件：
+**App.vue文件（根组件）：**
 
 说明：app.vue是项目的主组件，所有页面都是在app.vue下切换的。一个标准的vue文件，分为三部分。
 
 第一装写html代码在&lt;template&gt;&lt;/template&gt;中，一般在此下面只能定义一个根节点；
 
-第二&lt;script&gt;&lt;/script&gt;标签；
+第二&lt;script&gt;&lt;/script&gt;标签，app组件相当于单组件页面，然后所有；
 
 第三&lt;style scoped&gt;&lt;/style&gt;用来写样式，其中scoped表示。该style作用于只在当前组件的节点及其子节点，但是不包含子组件呦。
 
@@ -138,9 +140,9 @@ App.vue文件：
 
 ![](.gitbook/assets/image%20%281%29.png)
 
-**main.js:**
+**main.js（入口文件）:**
 
-说明：入口文件来着，主要作用是初始化vue实例并使用需要的插件。比如下面引用了4个插件，但只用了app（components里面是引用的插件）。
+说明：入口文件，主要作用是初始化vue实例并使用需要的插件。比如下面引用了4个插件，但只用了app（components里面是引用的插件）。
 
 > **用npm下载的插件，import导入时都不用加./直接写名字即可，如下方vue-resource，但是npm下载的东西使用时需要用Vue.use\(\)来引入一下才能正常使用**
 

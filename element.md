@@ -2,6 +2,8 @@
 
 {% embed url="https://element.eleme.cn/\#/zh-CN/component/menu" %}
 
+## 在线使用
+
 导航栏使用方法：导航栏加路由方式
 
 ```markup
@@ -91,4 +93,34 @@
 </body>
 </html>
 ```
+
+## 配合vue-cli使用
+
+### 安装element-ui
+
+能更好的配合webpack打包工具的使用
+
+```javascript
+npm install element-ui -S
+```
+
+### 引用element-ui
+
+在 main.js 中写入以下内容：
+
+```javascript
+import Vue from 'vue';
+import ElementUI from 'element-ui';  // 引入
+import 'element-ui/lib/theme-chalk/index.css'; // 引入样式文件
+import App from './App.vue';
+
+Vue.use(ElementUI); // vue使用
+
+new Vue({
+  el: '#app',
+  render: h => h(App)
+});
+```
+
+以上代码便完成了 Element 的引入。需要注意的是，样式文件需要单独引入。
 
