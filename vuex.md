@@ -18,9 +18,7 @@
   npm i vuex -s
   ```
 
-* 在项目的根目录下新增一个`store`文件夹，在该文件夹内创建index.js
-
-  此时你的项目的`src`文件夹应当是这样的
+* 在项目的src目录下新增一个`store`文件夹，在该文件夹内创建index.js，此时你的项目的`src`文件夹应当是这样的
 
   ```text
   │  App.vue
@@ -43,29 +41,27 @@
 
 **1.3.1 初始化store下index.js中的内容**
 
-```text
+```javascript
 import Vue from 'vue'
 import Vuex from 'vuex'
 
 //挂载Vuex
-Vue.use(Vuex)
-
+Vue.use(Vuex);
 //创建VueX对象
-const store = new Vuex({
-    state:{
-        //存放的键值对就是所要管理的状态
-        name:'helloVueX'
-    }
+export default new Vuex.Store({
+  state:{
+    //存放的键值对就是所要管理的状态（所有公用数据）
+    name:'helloVueX'
+  }
 })
 
-export default store
 ```
 
 **1.3.2 将store挂载到当前项目的Vue实例当中去**
 
 打开main.js
 
-```text
+```javascript
 import Vue from 'vue'
 import App from './App'
 import router from './router'

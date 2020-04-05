@@ -548,7 +548,7 @@ vm.$emit('test', 'hi')
 
 ### 非父子组件通信
 
-**单页面**
+{% embed url="https://www.cnblogs.com/jin-zhe/p/9291071.html" %}
 
 非父子组件的传值，vue官网指出，可以使用一个空vue实例作为事件中央线！
 
@@ -616,65 +616,6 @@ vm.$emit('test', 'hi')
   })
 </script>
 </html>
-```
-
-**小項目中**
-
-公共实例文件bus.js，作为公共数控中央总线，**用vue-cli搭建的项目中，公共实例只能是js文件，不能是vue文件**
-
-```text
-import Vue from "vue";
-export default new Vue();
-```
-
-第一个组件 first.vue
-
-```text
-import Bus from '../bus.js';
-export default {
-  name: 'first',
-  data () {
-    return {
-      value: '我来自first.vue组件！'
-    }
-  },
-  methods:{
-    add(){// 定义add方法，并将msg通过txt传给second组件
-      Bus.$emit('txt',this.value);
-    }
-  }
-}
-```
-
-**第二个组件second.vue**
-
-```text
-import Bus from '../bus.js';
-export default {
-  name: 'second',
-  data () {
-    return {
-    }
-  },
-  mounted:function(){
-    Bus.$on('txt',function(val){//监听first组件的txt事件
-      console.log(val);
-    });
-  }
-}
-```
-
-这样，就可以在第二个非父子关系的组件中，通过第三者bus.js来**获取**到第一个组件的value，为什么说获取，因为将mounted进行修改后，可以更改第二个组件的属性内容，但是无法将内容渲染到网页上，不知道为啥
-
-```text
-mounted: function () {
-  let that = this;//添加that定义使之不是bus，因为下面的this是bus，不是第二个组件
-  bus.$on('txt', function (val) {//监听first组件的txt事件
-    // console.log(val);
-    that.msg = val;
-    console.log(that.msg);//这里已经变化，但是页面没有刷新插值，不知道为什么，强制刷新也不行
-  });
-}
 ```
 
 ### 评论列表案例

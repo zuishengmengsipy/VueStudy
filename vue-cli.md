@@ -156,5 +156,7 @@ build中配置了webpack的基本配置、开发环境配置、生产环境配�
 
 {% embed url="https://www.cnblogs.com/hongdiandian/p/8311645.html" %}
 
+## vue解构，引入配件
 
+以vue-router为例
 
