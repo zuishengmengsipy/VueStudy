@@ -65,7 +65,7 @@ export default new Vuex.Store({
 import Vue from 'vue'
 import App from './App'
 import router from './router'
-import store from './store'
+import store from './store' //import store from './store/index.js'一样的效果
 
 Vue.config.productionTip = false
 
@@ -83,30 +83,47 @@ new Vue({
 
 例如在App.vue中，我们要将state中定义的name拿来在h1标签中显示
 
-```text
+```markup
 <template>
     <div id='app'>
         name:
         <h1>{{ $store.state.name }}</h1>
+        <!--<h1>{{ vuex_msg }}</h1>-->
     </div>
 </template>
 ```
 
 或者要在组件方法中使用
 
-```text
+```javascript
 ...,
 methods:{
     add(){
       console.log(this.$store.state.name)
+      //console.log(this.vuex_msg)
     }
 },
 ...
 ```
 
-**注意，请不要在此处更改`state`中的状态的值，后文中将会说明**
+**但是上面两种使用方式不够语义化，需要自定义名称时，不要将数据放在data里，放在计算属性里，因为会实时更新**
 
-**但是上面两种使用方式不够语义化，需要自定义名称时，不要讲数据放在data里，放在计算属性里**
+```javascript
+export default {
+  name: "front",
+  data() {
+    return {
+    }
+  },
+  computed: {
+    vuex_msg: function () {
+      return this.$store.state.name
+    }
+  }
+}
+```
+
+**注意，请不要在此处更改`state`中的状态的值，后文中将会说明**
 
 ## 二、VueX中的核心内容
 
@@ -122,7 +139,7 @@ methods:{
 
 ### 2.1 VueX的工作流程
 
-![](//upload-images.jianshu.io/upload_images/16550832-20d0ad3c60a99111.png?imageMogr2/auto-orient/strip|imageView2/2/w/701/format/webp)Vuex官网给出的流程图
+![](//upload-images.jianshu.io/upload_images/16550832-20d0ad3c60a99111.png?imageMogr2/auto-orient/strip|imageView2/2/w/701/format/webp)
 
 首先，`Vue`组件如果调用某个`VueX`的方法过程中需要向后端请求时或者说出现异步操作时，需要`dispatch` VueX中`actions`的方法，以保证数据的同步。可以说，`action`的存在就是为了让`mutations`中的方法能在异步操作中起作用。
 
@@ -130,7 +147,7 @@ methods:{
 
 最后被修改后的state成员会被渲染到组件的原位置当中去。
 
-### 2.2 Mutations
+### 2.2 Mutations（增删改）
 
 `mutations`是操作`state`数据的方法的集合，比如对该数据的修改、增加、删除等等。
 
@@ -153,25 +170,24 @@ import Vuex from 'vuex'
 
 Vue.use(Vuex)
 
-const store = new Vuex({
+export default new Vuex({
     state:{
         name:'helloVueX'
     },
     mutations:{
         //es6语法，等同edit:funcion(){...}
-        edit(state){
+        edit(state,payload){
             state.name = 'jack'
+            console.log(payload)
         }
     }
 })
-
-export default store
 ```
 
 而在组件中，我们需要这样去调用这个`mutation`——例如在App.vue的某个`method`中:
 
 ```text
-this.$store.commit('edit')
+this.$store.commit('edit',"这是参数") //形参是方法名和参数
 ```
 
 **2.2.2 Mutation传值**
@@ -231,18 +247,16 @@ this.$store.commit({
   Vue.delete(state,'age')
   ```
 
-### 2.3 Getters
+### 2.3 Getters（查）
 
-可以对state中的成员加工后传递给外界
-
-Getters中的方法有两个默认参数
+可以对state中的成员加工后传递给外界，Getters中的方法有两个默认参数
 
 * state 当前VueX对象中的状态对象
-* getters 当前getters对象，用于将getters下的其他getter拿来用
+* getters 当前getters对象，用于将getters下的其他getter拿来用，传gatters时一定要同时传state
 
 例如
 
-```text
+```javascript
 getters:{
     nameInfo(state){
         return "姓名:"+state.name

@@ -146,7 +146,7 @@
 
 ### 组件中展示数据和响应事件
 
-在组件中，**`data`必须被定义为一个方法**，例如：
+**在组件中**，**`data`必须被定义为一个方法**，例如：
 
 ```markup
 <html>
@@ -198,6 +198,7 @@
             return { count:8 }
             //使用下面这种是因为要每次组件生成标签，data是不同的对象，互不影响
             //因为虽然data一样，但是data每次返回的对象不一样
+            
         },
         methods:{
             increment(){
@@ -220,9 +221,13 @@
 
 在子组件中，如果将模板字符串，定义到了script标签中，那么，要访问子组件身上的`data`属性中的值，需要使用`this`来访问；
 
-**【重点】为什么组件中的data属性必须定义为一个方法并返回一个对象？**
+## **【重点】为什么组件中的data属性必须定义为一个方法并返回一个对象？**
 
-计数器案例，方法每次返回的都是不同的数据对象，计数器之间互不影响，返回对象的话，所有的计数器调用的都是同一个计数对象
+计数器案例，方法每次返回的都是不同的数据对象，计数器之间互不影响，返回对象的话，所有的计数器调用的都是同一个计数对象。
+
+因为组件可以复用，直接return {···:···}的话，每个标签都有自己独自的data返回对象，如果return的数据是类似于this.$store.state.name这种，一个更新，不会影响另一个，而先定义dataobj（如上代码）在return dataobj的话，每个标签的obj都一样，所以会同时更新（但是不建议先定义dataobj）
+
+问题思考，类似于下面非父子组件通信那里，多页面传值为什么插值表达式没有更改？明明python.msg都已经更改了，但是上方的插值却没有更改
 
 ## 组件的切换（:is的使用）
 
@@ -548,7 +553,7 @@ vm.$emit('test', 'hi')
 
 ### 非父子组件通信
 
-{% embed url="https://www.cnblogs.com/jin-zhe/p/9291071.html" %}
+**单页面**
 
 非父子组件的传值，vue官网指出，可以使用一个空vue实例作为事件中央线！
 
@@ -617,6 +622,112 @@ vm.$emit('test', 'hi')
 </script>
 </html>
 ```
+
+**小項目（vue-cli搭建的）中（模拟vuex数据仓库）**
+
+公共实例文件bus.js，作为公共数控中央总线，**用vue-cli搭建的项目中，公共实例只能是js文件，不能是vue文件**
+
+```javascript
+import Vue from "vue";
+export default new Vue();
+```
+
+第一个组件 first.vue
+
+```javascript
+import Bus from '../bus.js';
+export default {
+  name: 'first',
+  data () {
+    return {
+      value: '我来自first.vue组件！'
+    }
+  },
+  methods:{
+    add(){// 定义add方法，并将msg通过txt传给second组件
+      Bus.$emit('txt',this.value);
+    }
+  }
+}
+```
+
+**第二个组件second.vue**
+
+```javascript
+import Bus from '../bus.js';
+export default {
+  name: 'second',
+  data () {
+    return {
+    }
+  },
+  mounted:function(){
+    Bus.$on('txt',function(val){//监听first组件的txt事件
+      console.log(val);
+    });
+  }
+}
+```
+
+这样，就可以在第二个非父子关系的组件中，通过第三者bus.js来**获取**到第一个组件的value，为什么说获取，因为将mounted进行修改后，可以更改第二个组件的属性内容，但是无法将内容渲染到网页上，知道为什么么？下面解密
+
+```javascript
+<template>
+  <div>
+    <h1>这是python组件</h1>
+    <h2>{{msg}}</h2>
+  </div>
+</template>
+<script>
+import Bus from '../bus.js';
+export default {
+  name: 'second',
+  data () {
+    return {
+      msg:"ddd"
+    }
+  },
+    mounted: function () {
+    let that = this;//添加that定义，因为下面$on的this是bus，不是second组件，要使之是second
+    bus.$on('txt', function (val) {//监听first组件的txt事件
+      // console.log(val);
+      that.msg = val;
+      console.log(that.msg);
+      //这里已经变化，但是页面{{msg}}没有刷新插值，不知道为什么，强制刷新也不行
+    });
+  }
+}
+</script>
+```
+
+因为组件的复用，这里的that和second虽然都是second组件，但却不是一个组件了，而对于组件的data来说，只要不是同一个组件，那么data\(\) return的对象不是一个对象，你修改that，虽然也是修改了second组件的data，但是不影响原页面的second，验证结论正确，将data\(\) return的东西改成同一个对象，能刷新出来就代表上面的正确
+
+```javascript
+<script>
+import Bus from '../bus.js';
+let dataObj = {msg:"3333"}
+export default {
+  name: 'second',
+  data () {
+    return dataObj  //这种能更新
+    //return {
+      //msg:"ddd"
+    //}
+  },
+    mounted: function () {
+    let that = this;//添加that定义，因为下面$on的this是bus，不是second组件，要使之是second
+    bus.$on('txt', function (val) {//监听first组件的txt事件
+      // console.log(val);
+      that.msg = val;
+      console.log(that.msg);
+      //这里已经变化，但是页面{{msg}}没有刷新插值，不知道为什么，强制刷新也不行
+    });
+  }
+}
+</script>
+```
+
+注意对比单页面的非父子传递，其实组件之前传递信息，大多还是用vuex
 
 ### 评论列表案例
 
