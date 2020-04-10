@@ -418,7 +418,7 @@ http {
 
 重新加载nginx
 
-/usr/sbin/nginx -s reload
+`/usr/sbin/nginx -s reload`
 
 然后可以访问[www.wlxtech.c](http://www.wlxtech.com)进行验证，看看有没有页面
 
@@ -439,113 +439,9 @@ http {
     }
 ```
 
+重新加载nginx
+
+`/usr/sbin/nginx -s reload`
+
 大功告成
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-然后nginx配置：打开配置文件default，路径/etc/nginx/sites-available/default，设置以下内容。一个是server\_name后面换成你的阿里云公网IP，有的文章说不换也行。关键是下面2个location，第一个location是设置的和uWSGI的关联。第二个location /static是设置的静态文件的路径。如果你的项目还有media文件夹，那还要加一个location /media，把路径设置上。注意：location 和alias后面有空格。 
-
-```text
-server_name 47.94.7.122;
-location / {
-    # First attempt to serve request as file, then
-    # as directory, then fall back to displaying a 404.
-    # try_files $uri $uri/ =404;
-    include  uwsgi_params;
-    uwsgi_pass  127.0.0.1:8000;
-}
-```
-
-**uWSGI安装：**
-
-这个是安装在虚拟环境中，先workon blogs\_test进入虚拟环境，安装uWSGI前需要先安装依赖，输入以下命令完成安装
-
-apt-get install build-essential python
-
-apt-get install python-dev
-
-pip install uwsgi
-
-配置uWSGI：在django项目的根目录\(myblogs\)下，新建两个文件，
-
-uwsgi.ini和run.log 。
-
-touch uwsgi.ini
-
-touch run.log 
-
-第一个是uWSGI的配置文件，第二个是日志记录文件。设置uwsgi.ini文件如下：
-
-\[uwsgi\] chdir = /home/myweb  
-module = myweb.wsgi:application socket = 127.0.0.1:8000  
-master = true  
-daemonize = /home/myweb/run.log disable-logging = true wsgi-file = /home/myweb/myweb/wsgi.py pidfile=/home/myweb/uwsgi.pid chdir是django项目所在目录，socket后面的地址是和上面nginx配置文件中的地址uwsgi\_pass 127.0.0.1:8000对应的，规定nginx和uWSGI之间的通信端口。daemonize就是日志文件的路径。disable-logging = true 表示不记录正常信息，只记录错误信息。wsgi-file是你django项目根目录下项目同名目录中有一个wsgi.py文件的路径。pidfile是uwsgi.pid文件的路径，这个文件是uWSGI运行后自动生成的，里面记录了uWSGI的进程号，可以用来重启uWSGI。但是我的uwsgi.pid文件记录的进程号老是不对，用不了。
-
-
-
-uWSGI基本命令：
-
-```text
-启动：uwsgi --ini uwsgi.ini停止：uwsgi --stop uwsgi.pid重启：uwsgi --reload uwsgi.pid
-```
-
-全部配置好后，重启nginx和uWSGI，因该就可以用浏览器访问你的项目了。
-
-
-
-
-
-```text
-apt install uwsgi-plugin-python3
-```
-
-
-
-\`\`
 
