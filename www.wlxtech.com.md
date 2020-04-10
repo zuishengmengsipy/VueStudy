@@ -22,7 +22,7 @@ ubuntu18.04自带python3.6.9和python2.7.17
 
 `apt install tree`
 
-![](.gitbook/assets/image%20%287%29.png)
+![](.gitbook/assets/image%20%288%29.png)
 
 * **然后因为是原生环境，自带python2，所以python默认路径是python2，这里要改成python3，具体操作如下**
 
@@ -40,7 +40,7 @@ ubuntu18.04自带python3.6.9和python2.7.17
 
 然后输入2，即可把python命令的默认版本变成python3.6，具体操作如下图
 
-![](.gitbook/assets/image%20%284%29.png)
+![](.gitbook/assets/image%20%285%29.png)
 
 **正式安装虚拟环境**
 
@@ -120,7 +120,7 @@ ubuntu18.04自带python3.6.9和python2.7.17
 
 此时ls目录应该是这样的
 
-![](.gitbook/assets/image%20%2820%29.png)
+![](.gitbook/assets/image%20%2825%29.png)
 
 前后端代码都解压好了，目录为/root/luffy\_project
 
@@ -138,7 +138,7 @@ ubuntu18.04自带python3.6.9和python2.7.17
 
 解压缩之后执行一些命令，看看是否安装完成
 
-![](.gitbook/assets/image%20%2815%29.png)
+![](.gitbook/assets/image%20%2820%29.png)
 
 配置环境变量，使linux全局能访问node，PATH变量，修改/etc/profile（全局配置文件，每次登陆加载）
 
@@ -152,7 +152,7 @@ ubuntu18.04自带python3.6.9和python2.7.17
 
 然后执行几行命令，验证上述操作生效
 
-![](.gitbook/assets/image%20%2812%29.png)
+![](.gitbook/assets/image%20%2816%29.png)
 
 至此node环境安装完成
 
@@ -232,7 +232,7 @@ uWSGI==2.0.17.1
 
 显示如下：
 
-![](.gitbook/assets/image%20%289%29.png)
+![](.gitbook/assets/image%20%2812%29.png)
 
 进行依赖的安装：
 
@@ -240,7 +240,7 @@ uWSGI==2.0.17.1
 
 然后成功安装如下（使用pip list可以看安装的包有哪些）
 
-![](.gitbook/assets/image%20%2818%29.png)
+![](.gitbook/assets/image%20%2823%29.png)
 
 查看是否能正常运行：
 
@@ -248,7 +248,7 @@ uWSGI==2.0.17.1
 
 结果应如下：（如果显示端口被占用，kill掉占用的进程）
 
-![](.gitbook/assets/image%20%2810%29.png)
+![](.gitbook/assets/image%20%2814%29.png)
 
 ## 配置redis
 
@@ -256,45 +256,238 @@ uWSGI==2.0.17.1
 
  `apt-get install redis-server`
 
-\`\`
+安装后自动已经启动了redis服务，查看redis服务启动情况
 
-## 安装Django
+`ps -ef|grep redis`
+
+![](.gitbook/assets/image%20%2831%29.png)
+
+试试连接redis服务看看行不行redis-cli进行连接
+
+![](.gitbook/assets/image%20%2829%29.png)
+
+成功启动
+
+## 部署uwsgi
+
+进入项目目录
+
+`cd ~/luffy_project/luffy_boy`
 
 进入虚拟环境
 
-`workon blogs_test`
+`workon luffy`
 
-安装指定版本的django
+因为在安装项目依赖时已经安装了uwsgi，所以这里只要创建配置文件即可
 
-`pip install django==1.11.11`
+`touch uwsgi.ini`
 
-查看一下安装的django，
+编辑uwsgi.ini添加如下内容
 
-`pip list` 或者 `pip freeze`
+```text
+[uwsgi]
+# Django-related settings
+# the base directory (full path)
+chdir           = /root/luffy_project/luffy_boy
+# Django's wsgi file
+module          = luffy_boy.wsgi
+# the virtualenv (full path)
+home            = /root/.virtualenvs/luffy
+# process-related settings
+# master
+master          = true
+# maximum number of worker processes
+processes       = 1
+# the socket (use the full path to be safe)
+# 结合nginx，使用的参数，将uwsgi运行在一个socket链接上
+socket          = 0.0.0.0:9000
+# 不用nginx的话，直接访问到后端的数据页面用http
+# http = 0.0.0.0:9000
+# clear environment on exit
+vacuum          = true
+```
 
-#### 创建一个django项目
+启动uwsgi
 
-`django-admin startproject myblogs`
+`uwsgi --ini uwsgi.ini`
 
-运行一下试试
+![](.gitbook/assets/image%20%2817%29.png)
 
-`python manage.py runserver`
+后端在这里卡着就行
 
-**修改django的setting文件：**
+## 配置nginx
 
-`ALLOW_HOSTS=['47.94.7.122'] #改成阿里云的公网IP`
+安装nginx，因为后端的连接在卡着，所以新建一个终端
 
-安装nginx
+![](.gitbook/assets/image%20%2813%29.png)
 
 直接在终端安装，不用装在虚拟环境中，输入以下命令：
 
 `apt-get update`
 
+![](.gitbook/assets/image%20%289%29.png)
+
 `apt-get install nginx`
 
 安装成功后，用浏览器访问你的阿里云IP地址，可以看到以下提示 ：
 
-![](.gitbook/assets/image%20%2817%29.png)
+![](.gitbook/assets/image%20%2822%29.png)
+
+### 修改nginx配置文件
+
+查找nginx配置文件的位置：[https://www.cnblogs.com/qianpangzi/p/10922420.html](https://www.cnblogs.com/qianpangzi/p/10922420.html)
+
+我这配置文件在：/etc/nginx/nginx.conf
+
+修改配置文件，在http最末尾添加server，只需要粘贴server即可，其他的代码用于做对比
+
+```text
+http {
+    ##
+    # Basic Settings
+    ##
+
+    sendfile on;
+    tcp_nopush on;
+    tcp_nodelay on;
+    keepalive_timeout 65;
+    types_hash_max_size 2048;
+    # server_tokens off;
+
+    # server_names_hash_bucket_size 64;
+    # server_name_in_redirect off;
+
+    include /etc/nginx/mime.types;
+    default_type application/octet-stream;
+
+    ##
+    # SSL Settings
+    ##
+
+    ssl_protocols TLSv1 TLSv1.1 TLSv1.2; # Dropping SSLv3, ref: POODLE
+    ssl_prefer_server_ciphers on;
+
+    ##
+    # Logging Settings
+    ##
+
+    access_log /var/log/nginx/access.log;
+    error_log /var/log/nginx/error.log;
+
+    ##
+    # Gzip Settings
+    ##
+
+    gzip on;
+
+    # gzip_vary on;
+    # gzip_proxied any;
+    # gzip_comp_level 6;
+    # gzip_buffers 16 8k;
+    # gzip_http_version 1.1;
+    # gzip_types text/plain text/css application/json application/javascript text/xml application/xml application/xml+rss text/javascript;
+
+    ##
+    # Virtual Host Configs
+    ##
+
+    include /etc/nginx/conf.d/*.conf;
+    include /etc/nginx/sites-enabled/*;
+
+    server {
+                listen       80;
+                # server_name  47.94.7.122;
+                server_name  www.wlxtech.com;
+                # 只要请求来自于47.94.7.122/
+                location / {
+                        root /root/luffy_project/07-luffy_project_01/dist;
+                        index index.html;
+                        try_files $uri $uri/ /index.html;
+                }
+                error_page   500 502 503 504  /50x.html;
+                location = /50x.html {
+                        root   html;
+                }
+        }
+}
+```
+
+然后还要将权限修改一下：
+
+将配置文件的第一行`user www-data;` 修改为 `user root;`
+
+重新加载nginx
+
+/usr/sbin/nginx -s reload
+
+然后可以访问[www.wlxtech.c](http://www.wlxtech.com)进行验证，看看有没有页面
+
+然后在上一个server下面再加一个server
+
+```text
+    server {
+            listen       8000;
+            server_name  www.wlxtech.com;
+            location / {
+                    uwsgi_pass 0.0.0.0:9000;
+                    include /etc/nginx/uwsgi_params;
+            }
+            location /static {
+                    alias /opt/static;
+            }
+
+    }
+```
+
+大功告成
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 然后nginx配置：打开配置文件default，路径/etc/nginx/sites-available/default，设置以下内容。一个是server\_name后面换成你的阿里云公网IP，有的文章说不换也行。关键是下面2个location，第一个location是设置的和uWSGI的关联。第二个location /static是设置的静态文件的路径。如果你的项目还有media文件夹，那还要加一个location /media，把路径设置上。注意：location 和alias后面有空格。 
 
