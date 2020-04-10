@@ -9,5 +9,5 @@
 * [vue-cli](vue-cli.md)
 * [vuex](vuex.md)
 * [Vue.js Ajax\(axios\)](vue.js-ajax-axios.md)
-* [www.wlxtech.com](www.wlxtech.com.md)
+* [部署路飞项目](www.wlxtech.com.md)
 
