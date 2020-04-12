@@ -439,6 +439,8 @@ http {
     }
 ```
 
+上面的uwsgi\_pass的地址需要和uwsgi的配置文件里socket项的地址相同，否则无法让uwsgi接收到请求
+
 重新加载nginx
 
 `/usr/sbin/nginx -s reload`
