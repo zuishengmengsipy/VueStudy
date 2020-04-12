@@ -503,7 +503,7 @@ var register = Vue.extend({
 </html>
 ```
 
-## 路由验证用户登录状态的方法
+## 路由验证用户登录状态\(钩子\)
 
 使用router.beforeEach\(\)和判断登录状态的meta属性auth，mata的元信息，键值都是自己设置，作用自己设置。
 
