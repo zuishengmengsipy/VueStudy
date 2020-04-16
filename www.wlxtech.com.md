@@ -307,9 +307,11 @@ socket          = 0.0.0.0:9000
 vacuum          = true
 ```
 
-启动uwsgi
+启动uwsgi 
 
-`uwsgi --ini uwsgi.ini`
+第二次运行启动不了可能是有一个uwsgi占用端口   ps -ef\|grep uwsgi查看,kill -9 进程id    去删除
+
+`uwsgi --ini uwsgi.ini`前台运行，后台运行用这个`uwsgi -d --ini uwsgi.ini`
 
 ![](.gitbook/assets/image%20%2817%29.png)
 
@@ -446,4 +448,8 @@ http {
 `/usr/sbin/nginx -s reload`
 
 大功告成
+
+![](.gitbook/assets/1132884-20190403225637482-516969019.png)
+
+
 
