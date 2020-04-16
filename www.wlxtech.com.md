@@ -100,9 +100,11 @@ ubuntu18.04自带python3.6.9和python2.7.17
 
 不报错的话，到目前为止都OK
 
+退出虚拟环境`deactivate`
+
 ## 将代码搞到服务器上
 
-在linux上直接下载 
+在linux上直接下载，在刚刚创建的luffy\_project目录下执行
 
 `wget https://files.cnblogs.com/files/pyyu/luffy_boy.zip`
 
@@ -128,7 +130,7 @@ ubuntu18.04自带python3.6.9和python2.7.17
 
 **要在服务器上，编译打包vue项目，必须得有node环境，安装node环境**
 
-下载node二进制包，此包已经包含node，不需要再编译\(要等一会\)
+在~/luffy\_project目录下，下载node二进制包，此包已经包含node，不需要再编译\(要等一会\)
 
 `wget https://nodejs.org/download/release/v8.6.0/node-v8.6.0-linux-x64.tar.gz`
 
@@ -161,10 +163,6 @@ ubuntu18.04自带python3.6.9和python2.7.17
 进入vue源码目录
 
 `cd ~/luffy_project/07-luffy_project_01`
-
-先全局安装一下webpack，否则npm install可能会出错
-
-`npm install webpack -g（这句好像可以不执行）`
 
 安装vue模块，默认去装package.json的模块内容，如果出现模块安装失败，手动再装
 
@@ -427,18 +425,18 @@ http {
 然后在上一个server下面再加一个server
 
 ```text
-    server {
-            listen       8000;
-            server_name  www.wlxtech.com;
-            location / {
-                    uwsgi_pass 0.0.0.0:9000;
-                    include /etc/nginx/uwsgi_params;
-            }
-            location /static {
-                    alias /opt/static;
-            }
-
+server {
+    listen       8000;
+    server_name  www.wlxtech.com;
+    location / {
+            uwsgi_pass 0.0.0.0:9000;
+            include /etc/nginx/uwsgi_params;
     }
+    location /static {
+            alias /opt/static;
+    }
+
+}
 ```
 
 上面的uwsgi\_pass的地址需要和uwsgi的配置文件里socket项的地址相同，否则无法让uwsgi接收到请求
@@ -447,7 +445,9 @@ http {
 
 `/usr/sbin/nginx -s reload`
 
-大功告成
+访问[http://www.wlxtech.com](http://www.wlxtech.com/)即可看到网页
+
+点击免费课程，看到有课程，才算大功告成
 
 ![](.gitbook/assets/1132884-20190403225637482-516969019.png)
 
