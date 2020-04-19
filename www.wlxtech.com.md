@@ -420,7 +420,7 @@ http {
 
 `/usr/sbin/nginx -s reload`
 
-然后可以访问[www.wlxtech.c](http://www.wlxtech.com)进行验证，看看有没有页面
+然后可以访问www.wlxtech.com进行验证，看看有没有页面
 
 然后在上一个server下面再加一个server
 
